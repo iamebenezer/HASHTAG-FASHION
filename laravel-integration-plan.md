@@ -24,10 +24,10 @@ This document outlines the plan for integrating a Laravel backend API with the e
 ## Required Laravel Packages
 
 1. **Laravel Sanctum** - For API authentication
-2. **Laravel Nova/Voyager/Backpack** - For admin dashboard
+2. **Filament** - For admin dashboard and CRUD operations
 3. **Laravel CORS** - For handling Cross-Origin Resource Sharing
 4. **Laravel Eloquent** - For database ORM
-5. **Laravel Passport** - If OAuth authentication is needed
+5. **Paystack PHP** - For payment processing
 
 ## API Endpoints
 
@@ -64,13 +64,16 @@ DELETE /api/cart/remove/{id} - Remove item from cart
 DELETE /api/cart/clear - Clear cart
 ```
 
-### Orders
+### Orders & Payments
 
 ```
 GET /api/orders - Get user's orders
 GET /api/orders/{id} - Get specific order
 POST /api/orders - Create a new order
 GET /api/orders/{id}/status - Check order status
+POST /api/payments/initialize - Initialize Paystack payment
+POST /api/payments/verify - Verify Paystack payment
+POST /api/webhook/paystack - Handle Paystack webhooks
 ```
 
 ### User Profile
@@ -124,6 +127,9 @@ PUT /api/user/profile - Update user profile
 - total_amount
 - shipping_address
 - status
+- payment_status
+- paystack_reference
+- paystack_transaction_id
 - created_at
 - updated_at
 
@@ -203,8 +209,9 @@ export const fetchProducts = createAsyncThunk(
 2. **Install required packages**
    ```bash
    composer require laravel/sanctum
-   composer require laravel/nova # or voyager or backpack
+   composer require filament/filament
    composer require fruitcake/laravel-cors
+   composer require paystack/paystack-php
    ```
 
 3. **Configure database connection**
@@ -226,24 +233,26 @@ export const fetchProducts = createAsyncThunk(
 7. **Create API controllers and routes**
    Implement the API endpoints listed above
 
-8. **Set up the admin dashboard**
-   Configure Nova/Voyager/Backpack for the admin interface
+8. **Set up Filament admin panel**
+   ```bash
+   php artisan filament:install
+   php artisan make:filament-user
+   ```
 
-## Recommended Premium Packages
+9. **Configure Paystack**
+   - Add Paystack credentials to .env file
+   - Set up webhook URL in Paystack dashboard
+   - Create payment service and controllers
 
-1. **Laravel Nova** ($199 for solo license) - A beautifully designed administration panel for Laravel
-   - https://nova.laravel.com/
+## Recommended Packages
 
-2. **Laravel Backpack** ($69-$299) - A collection of packages that help you build custom admin panels
-   - https://backpackforlaravel.com/
+1. **Filament** (Free) - A collection of beautiful full-stack components for Laravel
+   - https://filamentphp.com/
 
-3. **Laravel Voyager** (Free) - A fully functional admin panel with CRUD operations
-   - https://voyager.devdojo.com/
+2. **Paystack PHP** (Free) - Official Paystack PHP library
+   - https://github.com/yabacon/paystack-php
 
-4. **Laravel Cashier** - For subscription billing integration
-   - https://laravel.com/docs/billing
-
-5. **Laravel Horizon** - For queue monitoring (useful for processing orders)
+3. **Laravel Horizon** - For queue monitoring (useful for processing orders)
    - https://laravel.com/docs/horizon
 
 ## Development Workflow
@@ -264,8 +273,10 @@ export const fetchProducts = createAsyncThunk(
 
 ## Next Steps
 
-1. Choose the admin dashboard package (Nova, Voyager, or Backpack)
-2. Set up the Laravel project structure
+1. Set up the Laravel project structure
+2. Install and configure Filament admin panel
 3. Implement the authentication system
 4. Create the product management API
-5. Integrate the React frontend with the new API
+5. Set up Paystack integration
+6. Configure webhook handling
+7. Integrate the React frontend with the new API
