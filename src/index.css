@@ -1,0 +1,50 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .hoverEffect {
+    @apply duration-300 cursor-pointer;
+  }
+  .headerSedenavLi {
+    @apply hover:underline underline-offset-2 cursor-pointer text-gray-300 hover:text-white;
+  }
+}
+
+/* ============= NavLink active Start here ============== */
+nav .active li {
+  color: black;
+  font-weight: 600;
+  text-decoration: 1px underline black;
+}
+
+@media screen and (max-width: 665px) {
+  nav .active li {
+    color: white;
+    font-weight: 600;
+    text-decoration: 1px underline white;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+/* ============= NavLink active End here ================ */
+@font-face {
+  font-family:block;
+  src: url(/src/assets/block.ttf);
+}
+
+@font-face {
+  font-family: paragraph;
+  src: url(/src/assets/dream_orphans/Dream.otf);
+}
+@font-face {
+  font-family: new;
+  src: url(/src/assets/OnelySans.ttf);
+ 
+}
+.font-bodyFont{
+  letter-spacing: 1px;
+}
