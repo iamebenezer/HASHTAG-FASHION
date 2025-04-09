@@ -15,7 +15,13 @@ const Cart = () => {
 
   useEffect(() => {
     const total = products.reduce(
-      (acc, item) => acc + item.price * item.quantity,
+      (acc, item) => {
+        //Dotmart code :: we have to  Parse the price string by removing commas before converting to number
+        const price = typeof item.price === 'string' 
+          ? parseFloat(item.price.replace(/,/g, '')) 
+          : Number(item.price);
+        return acc + price * Number(item.quantity);
+      },
       0
     );
     setTotalAmt(total);
