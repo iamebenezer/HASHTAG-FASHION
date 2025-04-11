@@ -70,7 +70,7 @@ const Cart = () => {
               <div>
                 <p className="flex items-center justify-between border border-gray-400 py-1.5 text-lg px-4 font-medium">
                   Shipping
-                  <span>₦{shippingCharge.toLocaleString()}</span>
+                  {/* <span>₦{shippingCharge.toLocaleString()}</span> */}
                 </p>
                 <p className="flex items-center justify-between border border-t-0 border-gray-400 py-1.5 text-lg px-4 font-medium">
                   Total

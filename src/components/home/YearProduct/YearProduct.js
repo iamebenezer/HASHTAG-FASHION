@@ -7,12 +7,14 @@ import Image from "../../designLayouts/Image";
 const YearProduct = () => {
   return (
     <Link to="/shop">
-      <div className="w-full h-80 mb-20 bg-[#f3f3f3] md:bg-transparent relative font-titleFont">
-        <Image
-          className="w-fit h-fit object-cover hidden md:inline-block"
-          imgSrc={productOfTheYear}
+      <div className="grid md:grid-cols-2 grid-cols-1 w-fit  ">
+      <div>
+        <img
+          className="w-[2500px] md:inline-block"
+          src={productOfTheYear}
         />
-        <div className="w-full md:w-2/3 xl:w-1/2 h-80 absolute px-4 md:px-0 top-0 right-0 flex flex-col items-start gap-6 justify-center">
+        </div>
+        <div className="w-full space-y-4 mb-4">
           <h1 className="text-3xl font-cloth text-primeColor">
             Product of The year
           </h1>
