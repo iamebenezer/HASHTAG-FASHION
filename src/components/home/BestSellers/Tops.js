@@ -1,46 +1,106 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Heading from "../Products/Heading";
 import Slider from "react-slick";
 import Product from "../Products/Product";
-import {
-  tankOne,
-  shirtOne,
-  sweatOne,
-  fourShirt,
-  shirtThree,
-  sweatTwo,
-  tankTwo,
-  shirtFour,
-  twoShirt,
-  shirtFive,
-
-
-} from "../../../assets/images/index";
+import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
-const tops = () => {
+
+const Tops = () => {
+  const [tops, setTops] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTops = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch categories
+        const categories = await apiService.categories.getAll();
+        if (!categories || !Array.isArray(categories)) {
+          console.log("Categories response:", categories);
+          throw new Error('Invalid categories data received');
+        }
+
+        // Find tops category
+        const topsCategory = categories.find(cat => 
+          cat.name.toLowerCase().includes('top')
+        );
+
+        if (!topsCategory) {
+          setError('Tops category not found');
+          setTops([]);
+          return;
+        }
+
+        // Fetch products for tops category
+        const products = await apiService.products.getByCategory(topsCategory.id);
+        
+        // Handle the case where products might be nested in a data property
+        const topsProducts = Array.isArray(products) ? products : 
+                            (products && Array.isArray(products.data) ? products.data : []);
+        
+        if (!topsProducts || !Array.isArray(topsProducts)) {
+          console.log("Products response:", products);
+          throw new Error('Invalid products data format');
+        }
+
+        // Remove duplicates and invalid products
+        const validProducts = topsProducts.filter(product => 
+          product && product.id && product.name && product.price
+        );
+        
+        // Create a Set of product IDs to ensure uniqueness
+        const uniqueProductIds = new Set();
+        const uniqueTops = validProducts.filter(product => {
+          if (uniqueProductIds.has(product.id)) {
+            return false;
+          }
+          uniqueProductIds.add(product.id);
+          return true;
+        });
+
+        setTops(uniqueTops);
+      } catch (err) {
+        console.error('Error fetching tops:', err);
+        setError(err.message || 'Failed to fetch tops');
+        setTops([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTops();
+  }, []);
+
+  // Determine if we should use infinite mode based on the number of products
+  const shouldUseInfinite = tops.length > 4;
+
   const settings = {
-    infinite: true,
+    infinite: shouldUseInfinite,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: Math.min(4, tops.length),
     slidesToScroll: 1,
     nextArrow: <SampleNextArrow />,
     prevArrow: <SamplePrevArrow />,
+    dots: true,
     responsive: [
       {
         breakpoint: 1025,
         settings: {
-          slidesToShow: 3,
+          slidesToShow: Math.min(3, tops.length),
           slidesToScroll: 1,
-          infinite: true,
+          infinite: shouldUseInfinite,
         },
       },
       {
         breakpoint: 769,
         settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2,
-          infinite: true,
+          slidesToShow: Math.min(2, tops.length),
+          slidesToScroll: 1,
+          infinite: shouldUseInfinite,
         },
       },
       {
@@ -48,123 +108,42 @@ const tops = () => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-          infinite: true,
+          infinite: shouldUseInfinite,
         },
       },
     ],
-  }
+  };
+
   return (
     <div className="w-full pb-16">
-    <Heading heading="Tops" />
-    <Slider {...settings}>
-      <div className="px-2">
-        <Product
-          _id="100001"
-          img={tankOne}
-          productName="HASHTAG GECK TANK TOP"
-          price="12,000"
-          color="Black, Ash & Brown"
-          // badge={true}
-          des="100% Cotton Solid Color. Flux Design at front. Comfy Neck Band on the Shirt. No sleeves.
-
-"
-        />
+      <Heading heading="Tops" />
+      <div className="w-full">
+        {loading ? (
+          <div className="text-center py-10">Loading tops...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-10">{error}</div>
+        ) : tops.length === 0 ? (
+          <div className="text-center py-10">No tops available</div>
+        ) : (
+          <Slider {...settings} className="w-full">
+            {tops.map((product) => (
+              <div key={product.id} className="px-2">
+                <Product
+                  _id={product.id}
+                  img={product.image_url || `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/storage/${product.image}`}
+                  productName={product.name}
+                  price={product.price}
+                  color={product.color || "Various"}
+                  badge={product.badge || false}
+                  des={product.description || ""}
+                />
+              </div>
+            ))}
+          </Slider>
+        )}
       </div>
-      <div className="px-2">
-        <Product
-          _id="100002"
-          img={shirtOne}
-          productName="HASHTAG CROPPED TOP"
-          price="10,000
-
-"
-          color="Black, Ash & Brown"
-          // badge={true}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck Band on the Shirt. Cropped and mainly for Women"
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100003"
-          img={sweatOne}
-          productName="HASHTAG BLOCK SWEATSHIRT"
-          price="20,000"
-          color="Black, Ash & Brown"
-          // badge={true}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck and Wrist Elastic Band."
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100004"
-          img={fourShirt}
-          productName="HASHTAG MIX 1 TEES"
-          price="16,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck Band on the Shirt"
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100005"
-          img={shirtThree}
-          productName="HASHTAG BLOCK TEES"
-          price="15,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck Band on the Shirt"
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100006"
-          img={sweatTwo}
-          productName="HASHTAG GECK SWEATSHIRT"
-          price="20,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck and Wrist Elastic Band."
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100007"
-          img={tankTwo}
-          productName="HASHTAG GYM TANK TOP"
-          price="12,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Monogram Design at front. Comfy Neck Band on the Shirt. No sleeves."
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100008"
-          img={shirtFour}
-          productName="HASHTAG GECK CROPPED"
-          price="20,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck Band on the Shirt. Cropped and mainly for Men."
-        />
-      </div>
-      <div className="px-2">
-        <Product
-          _id="100009"
-          img={twoShirt}
-          productName="HASHTAG MIX 2 TEES"
-          price="15,000"
-          color="Blank, Brown & Ash"
-          badge={false}
-          des="100% Cotton Solid Color. Flock Design at front. Comfy Neck Band on the Shirt"
-        />
-      </div>
-    
-      
-    </Slider>
-  </div>
+    </div>
   );
 };
 
-export default tops;
+export default Tops;

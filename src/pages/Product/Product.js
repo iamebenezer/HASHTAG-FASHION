@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
-import Image from "../../components/designLayouts/Image";
 import apiService from "../../services/api";
+import Image from "../../designLayouts/Image";
+import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
 
-const ProductDetails = () => {
+const Product = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Get product from location state or fetch from API
   useEffect(() => {
     if (location.state?.item) {
       setProduct(location.state.item);
@@ -42,13 +43,12 @@ const ProductDetails = () => {
     <div className="max-w-container mx-auto px-4 py-10">
       <Breadcrumbs 
         title="Products" 
-        prevLocation="/shop" 
-        prevText="Shop"
+        prevLocation={{ path: "/shop", text: "Shop" }} 
         currentLocation={product.productName} 
       />
       
       <div className="w-full flex flex-col md:flex-row gap-10">
-        {/* Product Image */}
+        {/* Product Images */}
         <div className="w-full md:w-1/2">
           <div className="border p-4">
             <Image className="w-full h-auto" imgSrc={product.img} />
@@ -88,4 +88,4 @@ const ProductDetails = () => {
   );
 };
 
-export default ProductDetails;
+export default Product;
