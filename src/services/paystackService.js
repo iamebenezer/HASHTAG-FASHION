@@ -4,7 +4,7 @@
  */
 
 // Replace with your actual Paystack public key
-const PAYSTACK_PUBLIC_KEY = "pk_live_bcaa7ed12333000a393421a5fad299172b29c4bb";
+const PAYSTACK_PUBLIC_KEY = "pk_test_ccf2f056f486538b0bc75cbb73950164d05ba781";
 
 /**
  * Initialize Paystack payment
