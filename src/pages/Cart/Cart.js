@@ -8,17 +8,6 @@ import { useCart } from "../../context/CartContext";
 
 const Cart = () => {
   const { cart, clearCart } = useCart();
-  const [shippingCharge, setShippingCharge] = useState(0);
-
-  useEffect(() => {
-    if (cart.totalPrice <= 200) {
-      setShippingCharge(30);
-    } else if (cart.totalPrice <= 400) {
-      setShippingCharge(25);
-    } else if (cart.totalPrice > 400) {
-      setShippingCharge(20);
-    }
-  }, [cart.totalPrice]);
 
   return (
     <div className="max-w-container mx-auto px-4">
@@ -62,19 +51,13 @@ const Cart = () => {
                 <p className="flex items-center justify-between border-[1px] border-gray-400 border-b-0 py-1.5 text-lg px-4 font-medium">
                   Subtotal{" "}
                   <span className="font-semibold tracking-wide font-titleFont">
-                    ${cart.totalPrice.toFixed(2)}
-                  </span>
-                </p>
-                <p className="flex items-center justify-between border-[1px] border-gray-400 border-b-0 py-1.5 text-lg px-4 font-medium">
-                  Shipping Charge{" "}
-                  <span className="font-semibold tracking-wide font-titleFont">
-                    ${shippingCharge.toFixed(2)}
+                    {cart.totalPrice.toFixed(2)}
                   </span>
                 </p>
                 <p className="flex items-center justify-between border-[1px] border-gray-400 py-1.5 text-lg px-4 font-bold">
                   Total{" "}
                   <span className="font-bold tracking-wide text-lg font-titleFont">
-                    ${(cart.totalPrice + shippingCharge).toFixed(2)}
+                    {cart.totalPrice.toFixed(2)}
                   </span>
                 </p>
               </div>
