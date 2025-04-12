@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import apiService from "../../services/api";
 import Image from "../../designLayouts/Image";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
+import LoadingSpinner from "../../components/LoadingSpinner"; // Importing the loading spinner
 
 const Product = () => {
   const location = useLocation();
@@ -35,7 +36,7 @@ const Product = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading product...</div>;
+  if (loading) return <LoadingSpinner />; // Use the loading spinner component
   if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
   if (!product) return <div className="text-center py-10">Product not found</div>;
 
