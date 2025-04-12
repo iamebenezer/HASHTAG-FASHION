@@ -1,11 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
 import Pagination from "../../components/pageProps/shopPage/Pagination";
 import ProductBanner from "../../components/pageProps/shopPage/ProductBanner";
 import ShopSideNav from "../../components/pageProps/shopPage/ShopSideNav";
+import apiService from "../../services/api";
 
 const Shop = () => {
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        let response;
+        if (selectedCategory) {
+          response = await apiService.products.getByCategory(selectedCategory);
+        } else {
+          response = await apiService.products.getAll();
+        }
+        
+        let productsData = Array.isArray(response) ? response : 
+                         (response && Array.isArray(response.data) ? response.data : []);
+        
+        if (!productsData || !Array.isArray(productsData)) {
+          throw new Error('Invalid products data format');
+        }
+
+        // Transform API response to match Product component expectations
+        productsData = productsData.map(product => ({
+          _id: product.id,
+          img: product.image_url || '/default-product-image.jpg',
+          productName: product.name,
+          price: product.price,
+          des: product.description,
+          color: product.color || 'N/A',
+          badge: product.badge || false
+        }));
+
+        setProducts(productsData);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError(err.message || 'Failed to fetch products');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [selectedCategory]);
+
   const itemsPerPageFromBanner = (itemsPerPage) => {
     setItemsPerPage(itemsPerPage);
   };
@@ -16,11 +66,19 @@ const Shop = () => {
       {/* ================= Products Start here =================== */}
       <div className="w-full h-full flex pb-20 gap-10">
         <div className="w-[20%] lgl:w-[25%] hidden mdl:inline-flex h-full">
-          <ShopSideNav />
+          <ShopSideNav 
+            onSelectCategory={setSelectedCategory}
+            selectedCategory={selectedCategory}
+          />
         </div>
         <div className="w-full mdl:w-[80%] lgl:w-[75%] h-full flex flex-col gap-10">
           <ProductBanner itemsPerPageFromBanner={itemsPerPageFromBanner} />
-          <Pagination itemsPerPage={itemsPerPage} />
+          <Pagination
+            products={products}
+            itemsPerPage={itemsPerPage}
+            loading={loading}
+            error={error}
+          />
         </div>
       </div>
       {/* ================= Products End here ===================== */}

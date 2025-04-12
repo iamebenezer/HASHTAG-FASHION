@@ -1,3 +1,4 @@
+import React from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -22,6 +23,7 @@ import Offer from "./pages/Offer/Offer";
 import Payment from "./pages/payment/Payment";
 import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Shop from "./pages/Shop/Shop";
+import { CartProvider } from "./context/CartContext";
 
 const Layout = () => {
   return (
@@ -60,9 +62,11 @@ const router = createBrowserRouter(
 
 function App() {
   return (
-    <div className="font-bodyFont">
-      <RouterProvider router={router} />
-    </div>
+    <CartProvider>
+      <div className="font-bodyFont">
+        <RouterProvider router={router} />
+      </div>
+    </CartProvider>
   );
 }
 
