@@ -1,87 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
-import Image from "../../components/designLayouts/Image";
-import apiService from "../../services/api";
+import ProductInfo from "../../components/pageProps/productDetails/ProductInfo";
+// import ProductsOnSale from "../../components/pageProps/productDetails/ProductsOnSale";
 
 const ProductDetails = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [prevLocation, setPrevLocation] = useState("");
+  const [productInfo, setProductInfo] = useState([]);
 
   useEffect(() => {
-    if (location.state?.item) {
-      setProduct(location.state.item);
-      setLoading(false);
-    } else {
-      const productId = location.pathname.split("/").pop();
-      fetchProduct(productId);
-    }
-  }, [location]);
-
-  const fetchProduct = async (id) => {
-    try {
-      setLoading(true);
-      const product = await apiService.products.getById(id);
-      setProduct(product);
-    } catch (err) {
-      console.error("Error fetching product:", err);
-      setError(err.message || "Failed to load product");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div className="text-center py-10">Loading product...</div>;
-  if (error) return <div className="text-center py-10 text-red-500">{error}</div>;
-  if (!product) return <div className="text-center py-10">Product not found</div>;
+    setProductInfo(location.state.item);
+    setPrevLocation(location.pathname);
+  }, [location, productInfo]);
 
   return (
-    <div className="max-w-container mx-auto px-4 py-10">
-      <Breadcrumbs 
-        title="Products" 
-        prevLocation="/shop" 
-        prevText="Shop"
-        currentLocation={product.productName} 
-      />
-      
-      <div className="w-full flex flex-col md:flex-row gap-10">
-        {/* Product Image */}
-        <div className="w-full md:w-1/2">
-          <div className="border p-4">
-            <Image className="w-full h-auto" imgSrc={product.img} />
-          </div>
+    <div className="w-full mx-auto border-b-[1px] border-b-gray-300">
+      <div className="max-w-container mx-auto px-4">
+        <div className="xl:-mt-10 -mt-7">
+          <Breadcrumbs title="" prevLocation={prevLocation} />
         </div>
-
-        {/* Product Details */}
-        <div className="w-full md:w-1/2">
-          <h1 className="text-2xl font-bold mb-2">{product.productName}</h1>
-          <p className="text-xl text-primeColor font-semibold mb-4">
-            ₦{product.price}
-          </p>
-          
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Description</h2>
-            <p className="text-gray-600">{product.des}</p>
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 h-full -mt-5 xl:-mt-8 pb-10 bg-gray-100 p-4">
+          {/* <div className="h-full">
+            <ProductsOnSale />
+          </div> */}
+          <div className="h-full xl:col-span-2">
+            <img
+              className="w-full h-full object-cover"
+              src={productInfo.img}
+              alt={productInfo.img}
+            />
           </div>
-
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Details</h2>
-            <ul className="space-y-2">
-              <li><span className="font-medium">Color:</span> {product.color}</li>
-              {product.size && <li><span className="font-medium">Size:</span> {product.size}</li>}
-              {product.material && <li><span className="font-medium">Material:</span> {product.material}</li>}
-            </ul>
+          <div className="h-full w-full md:col-span-2 xl:col-span-3 xl:p-14 flex flex-col gap-6 justify-center">
+            <ProductInfo productInfo={productInfo} />
           </div>
-
-          <button 
-            onClick={() => navigate(-1)}
-            className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition"
-          >
-            Back to Shop
-          </button>
         </div>
       </div>
     </div>
