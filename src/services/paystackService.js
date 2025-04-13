@@ -1,10 +1,13 @@
+import PaystackPop from '@paystack/inline-js';
+import { apiService } from './api';
+
 /**
  * Paystack API Service
  * This service handles all Paystack-related API calls
  */
 
 // Replace with your actual Paystack public key
-const PAYSTACK_PUBLIC_KEY = "pk_live_bcaa7ed12333000a393421a5fad299172b29c4bb";
+const PAYSTACK_PUBLIC_KEY = "pk_test_ccf2f056f486538b0bc75cbb73950164d05ba781";
 
 /**
  * Initialize Paystack payment
@@ -13,26 +16,36 @@ const PAYSTACK_PUBLIC_KEY = "pk_live_bcaa7ed12333000a393421a5fad299172b29c4bb";
  */
 export const initializePayment = (paymentData) => {
   return new Promise((resolve, reject) => {
-    if (typeof window.PaystackPop === 'undefined') {
-      reject(new Error("Paystack SDK not loaded"));
-      return;
-    }
-
     try {
+      // Validate required fields
+      if (!paymentData.email) {
+        throw new Error('Email is required');
+      }
+      if (!paymentData.amount || isNaN(paymentData.amount)) {
+        throw new Error('Valid amount is required');
+      }
+      
       console.log("Initializing Paystack payment with data:", paymentData);
       
-      const handler = window.PaystackPop.setup({
+      const paystack = new PaystackPop();
+      const amount = Math.round(paymentData.amount * 100); // Convert to kobo
+      
+      if (amount < 100) {
+        throw new Error('Amount must be at least 1 NGN');
+      }
+
+      paystack.newTransaction({
         key: PAYSTACK_PUBLIC_KEY,
         email: paymentData.email,
-        amount: Math.round(paymentData.amount * 100), // Amount in kobo
+        amount, // Amount in kobo
         currency: 'NGN',
         ref: paymentData.reference,
-        callback_url: window.location.origin + '/payment',
-        callback: function(response) {
+        onSuccess: (response) => {
           console.log("Paystack callback response:", response);
+          // Let the webhook handle order status update
           resolve(response);
         },
-        onClose: function() {
+        onClose: () => {
           console.log("Payment window closed");
           reject(new Error("Payment window closed"));
         },
@@ -54,10 +67,11 @@ export const initializePayment = (paymentData) => {
               value: paymentData.metadata?.order_id || ""
             }
           ]
-        }
+        },
+        callback_url: paymentData.callback_url,
+        channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
+        label: paymentData.customerName || paymentData.metadata?.customer_name || ""
       });
-      
-      handler.openIframe();
     } catch (error) {
       console.error("Error initializing Paystack payment:", error);
       reject(error);
@@ -66,31 +80,13 @@ export const initializePayment = (paymentData) => {
 };
 
 /**
- * Load Paystack script
- * @returns {Promise} - Promise that resolves when script is loaded
+ * Load Paystack package
+ * @returns {Promise} - Promise that resolves when package is loaded
  */
 export const loadPaystackScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.PaystackPop) {
-      resolve(window.PaystackPop);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    
-    script.onload = () => {
-      console.log("Paystack script loaded successfully");
-      resolve(window.PaystackPop);
-    };
-    
-    script.onerror = () => {
-      console.error("Failed to load Paystack script");
-      reject(new Error('Failed to load Paystack script'));
-    };
-    
-    document.body.appendChild(script);
+  return new Promise((resolve) => {
+    // The package is already loaded through import
+    resolve(PaystackPop);
   });
 };
 
@@ -101,20 +97,7 @@ export const loadPaystackScript = () => {
  */
 export const verifyPayment = async (reference) => {
   try {
-    const response = await fetch(`/paystack/verify/${reference}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error('Payment verification failed');
-    }
-    
-    return await response.json();
+    return await apiService.orders.getById(reference);
   } catch (error) {
     console.error("Error verifying payment:", error);
     throw error;

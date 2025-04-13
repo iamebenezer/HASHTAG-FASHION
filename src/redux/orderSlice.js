@@ -28,6 +28,7 @@ export const fetchOrderById = createAsyncThunk(
 );
 
 const initialState = {
+  orders: [],
   currentOrder: null,
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null
@@ -40,6 +41,13 @@ const orderSlice = createSlice({
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
       state.error = null;
+    },
+    addOrder: (state, action) => {
+      state.orders.push(action.payload);
+      state.currentOrder = action.payload;
+    },
+    setOrders: (state, action) => {
+      state.orders = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -74,4 +82,4 @@ const orderSlice = createSlice({
 });
 
 export const { clearCurrentOrder } = orderSlice.actions;
-export default orderSlice.reducer; 
+export default orderSlice.reducer;

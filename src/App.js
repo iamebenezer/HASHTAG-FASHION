@@ -21,6 +21,9 @@ import Home from "./pages/Home/Home";
 // import Journal from "./pages/Journal/Journal";
 import Offer from "./pages/Offer/Offer";
 import Payment from "./pages/payment/Payment";
+import Orders from "./pages/Orders/Orders"; // Importing Orders
+import Callback from "./pages/payment/Callback";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Shop from "./pages/Shop/Shop";
 import { CartProvider } from "./context/CartContext";
@@ -53,6 +56,9 @@ const router = createBrowserRouter(
         <Route path="/product/:_id" element={<ProductDetails />}></Route>
         <Route path="/cart" element={<Cart />}></Route>
         <Route path="/paymentgateway" element={<Payment />}></Route>
+        <Route path="/payment/callback" element={<Callback />}></Route>
+        <Route path="/payment/success" element={<PaymentSuccess />}></Route>
+        <Route path="/orders" element={<Orders />}></Route>
       </Route>
       <Route path="/signup" element={<SignUp />}></Route>
       <Route path="/signin" element={<SignIn />}></Route>

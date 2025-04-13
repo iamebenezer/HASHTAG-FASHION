@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
+import PaymentForm from "../../components/payment/PaymentForm";
 import { useNavigate, useLocation } from "react-router-dom";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
 import { useCart } from "../../context/CartContext";
 import { apiService } from "../../services/api";
 import paystackService from "../../services/paystackService";
+import { useDispatch } from "react-redux";
+import { ADD_ORDER } from "../../redux/orebiSlice";
 
 const Payment = () => {
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -82,6 +86,9 @@ const Payment = () => {
         setOrderPlaced(true);
         setOrderId(response.order.id);
         clearCart();
+        dispatch(ADD_ORDER(response.order));
+        // Dispatch order to Redux
+
       } else {
         setError(message || verifyResponse?.data?.message || 'Payment failed. Please try again.');
       }
@@ -233,140 +240,7 @@ const Payment = () => {
   return (
     <div className="max-w-container mx-auto px-4">
       <Breadcrumbs title="Payment" />
-      <div className="pb-10">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Shipping Information</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Email *</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Phone *</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Address *</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">State *</label>
-                  <select
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                    required
-                  >
-                    <option value="">Select State</option>
-                    {shippingFees.map((fee) => (
-                      <option key={fee.state} value={fee.state}>
-                        {fee.state} (₦{fee.fee.toFixed(2)})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block mb-1">ZIP Code</label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    className="w-full border p-2 rounded"
-                  />
-                </div>
-              </div>
-            </div>
-            <div>
-              <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
-              <div className="space-y-4">
-                <div className="border-b pb-4">
-                  <div className="flex justify-between mb-2">
-                    <span>Subtotal</span>
-                    <span>₦{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span>Shipping</span>
-                    <span>₦{shippingCost.toFixed(2)}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span>₦{total.toFixed(2)}</span>
-                </div>
-                <div>
-                  <label className="block mb-1">Payment Method</label>
-                  <select
-                    name="paymentMethod"
-                    value="paystack"
-                    disabled
-                    className="w-full border p-2 rounded bg-gray-100"
-                  >
-                    <option value="paystack">Paystack</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-black text-white py-3 rounded hover:bg-opacity-90 disabled:opacity-50"
-                >
-                  {loading ? 'Processing...' : 'Place Order'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
+      <PaymentForm />
     </div>
   );
 };

@@ -33,6 +33,7 @@ shortThree,
 
 // =================== NavBarList Start here ====================
 export const navBarList = [
+  
   {
     _id: 1001,
     title: "Home",
@@ -53,7 +54,11 @@ export const navBarList = [
     title: "Contact",
     link: "contact",
   },
-
+  {
+    _id: 1005,
+    title: "Orders",
+    link: "/orders",
+  },
 ];
 // =================== NavBarList End here ======================
 // =================== Special Offer data Start here ============

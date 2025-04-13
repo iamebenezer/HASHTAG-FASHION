@@ -4,6 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   products: [],
+  orders: [], // Adding orders array to the initial state
 };
 
 const orebiSlice = createSlice({
@@ -48,6 +49,10 @@ const orebiSlice = createSlice({
     resetCart: (state) => {
       state.products = [];
     },
+
+    ADD_ORDER: (state, action) => {
+      state.orders.push(action.payload);
+    },
   },
 });
 
@@ -57,6 +62,7 @@ export const {
   increaseQuantity,
   drecreaseQuantity,
   resetCart,
+  ADD_ORDER,
 } = orebiSlice.actions;
 
 export default orebiSlice.reducer;
