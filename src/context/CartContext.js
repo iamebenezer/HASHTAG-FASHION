@@ -27,8 +27,11 @@ const cartReducer = (state, action) => {
   
   switch (action.type) {
     case 'ADD_TO_CART':
+      // Check for existing item with same ID and color variant
       const existingItemIndex = state.items.findIndex(
-        item => item.id === action.payload.id
+        item => item.id === action.payload.id && 
+               item.color === action.payload.color &&
+               (item.color_variant_id === action.payload.color_variant_id)
       );
       
       if (existingItemIndex !== -1) {
@@ -43,33 +46,52 @@ const cartReducer = (state, action) => {
           ...state,
           items: updatedItems,
           totalItems: state.totalItems + action.payload.quantity,
-          totalPrice: state.totalPrice + (action.payload.price * action.payload.quantity)
+          totalPrice: state.totalPrice + (parseFloat(action.payload.price.toString().replace(/,/g, '')) * action.payload.quantity)
         };
       } else {
-        // Add new item
+        // Add new item - ensure color_variant_id is included if present
+        const newItem = {
+          ...action.payload,
+          color_variant_id: action.payload.color_variant_id || null
+        };
+        
         newState = {
           ...state,
-          items: [...state.items, action.payload],
+          items: [...state.items, newItem],
           totalItems: state.totalItems + action.payload.quantity,
-          totalPrice: state.totalPrice + (action.payload.price * action.payload.quantity)
+          totalPrice: state.totalPrice + (parseFloat(action.payload.price.toString().replace(/,/g, '')) * action.payload.quantity)
         };
       }
       break;
       
     case 'REMOVE_FROM_CART':
-      const itemToRemove = state.items.find(item => item.id === action.payload);
+      const itemToRemove = state.items.find(item => 
+        item.id === action.payload.id && 
+        item.color === action.payload.color &&
+        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true)
+      );
+      
       if (!itemToRemove) return state;
       
       newState = {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload),
+        items: state.items.filter(item => 
+          !(item.id === action.payload.id && 
+            item.color === action.payload.color &&
+            (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true))
+        ),
         totalItems: state.totalItems - itemToRemove.quantity,
-        totalPrice: state.totalPrice - (itemToRemove.price * itemToRemove.quantity)
+        totalPrice: state.totalPrice - (parseFloat(itemToRemove.price.toString().replace(/,/g, '')) * itemToRemove.quantity)
       };
       break;
       
     case 'UPDATE_QUANTITY':
-      const itemIndex = state.items.findIndex(item => item.id === action.payload.id);
+      const itemIndex = state.items.findIndex(item => 
+        item.id === action.payload.id && 
+        item.color === action.payload.color &&
+        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true)
+      );
+      
       if (itemIndex === -1) return state;
       
       const item = state.items[itemIndex];
@@ -85,7 +107,7 @@ const cartReducer = (state, action) => {
         ...state,
         items: updatedItems,
         totalItems: state.totalItems + quantityDiff,
-        totalPrice: state.totalPrice + (item.price * quantityDiff)
+        totalPrice: state.totalPrice + (parseFloat(item.price.toString().replace(/,/g, '')) * quantityDiff)
       };
       break;
       
@@ -94,11 +116,12 @@ const cartReducer = (state, action) => {
       break;
       
     default:
-      return state;
+      throw new Error(`Unhandled action type: ${action.type}`);
   }
   
   // Save to localStorage
   localStorage.setItem('hashtagFashionCart', JSON.stringify(newState));
+  
   return newState;
 };
 
@@ -106,34 +129,51 @@ const cartReducer = (state, action) => {
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState, loadCartFromStorage);
   
+  // Recalculate totals when items change
+  useEffect(() => {
+    const totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
+    const totalPrice = state.items.reduce((total, item) => {
+      const price = parseFloat(item.price.toString().replace(/,/g, ''));
+      return total + (price * item.quantity);
+    }, 0);
+    
+    if (totalItems !== state.totalItems || totalPrice !== state.totalPrice) {
+      const updatedState = {
+        ...state,
+        totalItems,
+        totalPrice
+      };
+      localStorage.setItem('hashtagFashionCart', JSON.stringify(updatedState));
+    }
+  }, [state.items]);
+  
   // Cart actions
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (item) => {
+    if (!item.quantity) item.quantity = 1;
+    
+    // Ensure color_variant_id is included if available
+    const cartItem = {
+      ...item,
+      color_variant_id: item.color_variant_id || null
+    };
+    
     dispatch({
       type: 'ADD_TO_CART',
-      payload: {
-        id: product.id || product._id,
-        name: product.name || product.productName,
-        price: parseFloat(product.price),
-        image: product.img || product.image_url,
-        quantity
-      }
+      payload: cartItem
     });
   };
   
-  const removeFromCart = (productId) => {
+  const removeFromCart = (id, color, color_variant_id = null) => {
     dispatch({
       type: 'REMOVE_FROM_CART',
-      payload: productId
+      payload: { id, color, color_variant_id }
     });
   };
   
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (id, color, quantity, color_variant_id = null) => {
     dispatch({
       type: 'UPDATE_QUANTITY',
-      payload: {
-        id: productId,
-        quantity
-      }
+      payload: { id, color, quantity, color_variant_id }
     });
   };
   
@@ -141,17 +181,16 @@ export const CartProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_CART' });
   };
   
-  // Value to be provided
-  const value = {
-    cart: state,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart
-  };
-  
   return (
-    <CartContext.Provider value={value}>
+    <CartContext.Provider
+      value={{
+        cart: state,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

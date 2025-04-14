@@ -19,64 +19,99 @@ class HttpClient {
     this.instance.interceptors.response.use(
       response => response,
       error => {
+        let errorMessage = 'An unknown error occurred';
+        
         if (error.response) {
-          // Handle specific error cases
-          switch (error.response.status) {
+          // Server responded with an error status code
+          const status = error.response.status;
+          const data = error.response.data;
+          
+          switch (status) {
             case 401:
-              console.error('Unauthorized access');
+              errorMessage = 'Authentication required. Please log in.';
               break;
             case 403:
-              console.error('Forbidden access');
+              errorMessage = 'You do not have permission to access this resource.';
               break;
             case 404:
-              console.error('Resource not found');
+              errorMessage = 'The requested resource was not found.';
               break;
             case 419:
-              console.error('CSRF token mismatch');
+              errorMessage = 'Your session has expired. Please refresh the page.';
               break;
             case 422:
-              console.error('Validation error:', error.response.data.errors);
+              errorMessage = data.message || 'Validation error. Please check your input.';
+              console.error('Validation errors:', data.errors);
               break;
             case 500:
-              console.error('Server error');
+              errorMessage = 'Server error. Please try again later.';
               break;
             default:
-              console.error('API error:', error.response.data);
+              errorMessage = data.message || `Error ${status}: Request failed`;
           }
+        } else if (error.request) {
+          // Request was made but no response received
+          errorMessage = 'No response from server. Please check your internet connection.';
         } else {
-          console.error('Network error:', error);
+          // Error in setting up the request
+          errorMessage = error.message || 'Error setting up the request';
         }
+        
+        // Add the error message to the error object
+        error.userMessage = errorMessage;
+        
+        console.error('API Error:', errorMessage, error);
         return Promise.reject(error);
       }
     );
   }
 
   async get(url, options = {}) {
-    const response = await this.instance.get(url, options);
-    return { data: response.data };
+    try {
+      const response = await this.instance.get(url, options);
+      return { data: response.data };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async post(url, data, options = {}) {
-    const response = await this.instance.post(url, data, options);
-    return { data: response.data };
+    try {
+      const response = await this.instance.post(url, data, options);
+      return { data: response.data };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async put(url, data, options = {}) {
-    const response = await this.instance.put(url, data, options);
-    return { data: response.data };
+    try {
+      const response = await this.instance.put(url, data, options);
+      return { data: response.data };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async delete(url, options = {}) {
-    const response = await this.instance.delete(url, options);
-    return { data: response.data };
+    try {
+      const response = await this.instance.delete(url, options);
+      return { data: response.data };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async request(url, options = {}) {
-    const response = await this.instance.request({
-      url,
-      ...options
-    });
-    return { data: response.data };
+    try {
+      const response = await this.instance.request({
+        url,
+        ...options
+      });
+      return { data: response.data };
+    } catch (error) {
+      throw error;
+    }
   }
 }
 

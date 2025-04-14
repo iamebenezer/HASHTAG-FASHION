@@ -81,16 +81,20 @@ const PaymentForm = () => {
         },
         items: cart.items.map(item => ({
           product_id: item.id,
+          product_name: item.productName,
           quantity: item.quantity,
           price: item.price,
-          subtotal: item.price * item.quantity
+          color: item.color || "Default",
+          color_variant_id: item.color_variant_id || null,
+          subtotal: parseFloat(item.price.toString().replace(/,/g, '')) * item.quantity
         })),
         payment_method: 'paystack',
         payment_reference: response.reference,
         status: 'paid',
         subtotal: cart.totalPrice,
         shipping_cost: shippingCost,
-        total_amount: cart.totalPrice + shippingCost
+        total_amount: cart.totalPrice + shippingCost,
+        created_at: new Date().toISOString()
       };
 
       const order = await apiService.orders.create(orderData);

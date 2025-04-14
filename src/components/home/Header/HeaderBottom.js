@@ -28,22 +28,46 @@ const HeaderBottom = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [showSearchBar, setShowSearchBar] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
     
     if (query.length > 2) { // Only search when query has at least 3 characters
+      setIsSearching(true);
       try {
         const results = await apiService.products.search(query);
         setFilteredProducts(results);
+        setIsSearching(false);
       } catch (err) {
         console.error("Search error:", err);
         setFilteredProducts([]);
+        setIsSearching(false);
       }
     } else {
       setFilteredProducts([]);
     }
+  };
+
+  const handleProductClick = (product) => {
+    // Navigate to product details page using the product ID
+    navigate(`/product/${product.id}`, {
+      state: {
+        item: {
+          _id: product.id,
+          img: product.image_url,
+          productName: product.name,
+          price: product.price,
+          color: product.colorVariants && product.colorVariants.length > 0 
+            ? product.colorVariants[0].color_name 
+            : "Default",
+          des: product.description
+        }
+      }
+    });
+    setShowSearchBar(false);
+    setSearchQuery("");
   };
 
   return (
@@ -67,7 +91,7 @@ const HeaderBottom = () => {
               >
                 <Link to="/shop">
                 <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
-               Cap
+                Cap
                 </li>
                 </Link>
                 <li className="text-gray-400 px-4 py-1 border-b-[1px] border-b-gray-400 hover:border-b-white hover:text-white duration-300 cursor-pointer">
@@ -95,33 +119,23 @@ const HeaderBottom = () => {
               <div
                 className={`w-full mx-auto h-96 bg-white top-16 absolute left-0 z-50 overflow-y-scroll shadow-2xl scrollbar-hide cursor-pointer`}
               >
-                {searchQuery &&
+                {isSearching ? (
+                  <div className="w-full h-full flex justify-center items-center">
+                    <p className="text-lg font-semibold text-primeColor">Searching...</p>
+                  </div>
+                ) : filteredProducts.length > 0 ? (
                   filteredProducts.map((item) => (
                     <div
-                      onClick={() =>
-                        navigate(
-                          `/product/${item.productName
-                            .toLowerCase()
-                            .split(" ")
-                            .join("")}`,
-                          {
-                            state: {
-                              item: item,
-                            },
-                          }
-                        ) &
-                        setShowSearchBar(true) &
-                        setSearchQuery("")
-                      }
-                      key={item._id}
-                      className="max-w-[600px] h-28 bg-gray-100 mb-3 flex items-center gap-3"
+                      onClick={() => handleProductClick(item)}
+                      key={item.id}
+                      className="max-w-[600px] h-28 bg-gray-100 mb-3 flex items-center gap-3 px-4 hover:bg-gray-200 transition-all duration-300"
                     >
-                      <img className="w-24" src={item.img} alt="productImg" />
+                      <img className="w-24 h-24 object-contain" src={item.image_url} alt={item.name} />
                       <div className="flex flex-col gap-1">
                         <p className="font-semibold text-lg">
-                          {item.productName}
+                          {item.name}
                         </p>
-                        <p className="text-xs">{item.des}</p>
+                        <p className="text-xs line-clamp-2">{item.description}</p>
                         <p className="text-sm">
                           Price:{" "}
                           <span className="text-primeColor font-semibold">
@@ -130,7 +144,12 @@ const HeaderBottom = () => {
                         </p>
                       </div>
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <div className="w-full h-full flex justify-center items-center">
+                    <p className="text-lg font-semibold text-gray-500">No products found</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

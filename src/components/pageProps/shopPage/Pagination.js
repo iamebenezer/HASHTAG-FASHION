@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReactPaginate from "react-paginate";
 import Product from "../../home/Products/Product";
 import { paginationItems } from "../../../constants";
+import { FaSpinner } from "react-icons/fa";
 
 const items = paginationItems;
 function Items({ currentItems }) {
@@ -25,7 +26,7 @@ function Items({ currentItems }) {
   );
 }
 
-const Pagination = ({ itemsPerPage, products }) => {
+const Pagination = ({ itemsPerPage, products, loading, error }) => {
   // Here we use item offsets; we could also use page offsets
   // following the API or data you're working with.
   const [itemOffset, setItemOffset] = useState(0);
@@ -45,6 +46,32 @@ const Pagination = ({ itemsPerPage, products }) => {
     setItemOffset(newOffset);
     setItemStart(newOffset);
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <FaSpinner className="animate-spin text-4xl text-primeColor mb-4" />
+        <p className="text-lg text-gray-600">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <p className="text-lg text-red-500 mb-2">Error loading products</p>
+        <p className="text-gray-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (products.length === 0 && !loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <p className="text-lg text-gray-600">No products found</p>
+      </div>
+    );
+  }
 
   return (
     <div>

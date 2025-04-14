@@ -30,9 +30,9 @@ export const addItemToCart = createAsyncThunk(
 // Async thunk for updating cart item quantity
 export const updateCartItemQuantity = createAsyncThunk(
   'cart/updateCartItemQuantity',
-  async ({ id, quantity }, { rejectWithValue }) => {
+  async ({ id, quantity, color_variant_id }, { rejectWithValue }) => {
     try {
-      const response = await cartService.updateCartItem(id, quantity);
+      const response = await cartService.updateCartItem(id, quantity, color_variant_id);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to update cart item' });
@@ -43,10 +43,10 @@ export const updateCartItemQuantity = createAsyncThunk(
 // Async thunk for removing an item from the cart
 export const removeCartItem = createAsyncThunk(
   'cart/removeCartItem',
-  async (id, { rejectWithValue }) => {
+  async ({ id, color_variant_id }, { rejectWithValue }) => {
     try {
-      await cartService.removeCartItem(id);
-      return id;
+      const response = await cartService.removeCartItem(id, color_variant_id);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to remove cart item' });
     }
@@ -58,8 +58,8 @@ export const clearCart = createAsyncThunk(
   'cart/clearCart',
   async (_, { rejectWithValue }) => {
     try {
-      await cartService.clearCart();
-      return true;
+      const response = await cartService.clearCart();
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to clear cart' });
     }
@@ -99,92 +99,96 @@ const cartSlice = createSlice({
       } else {
         state.shippingCharge = 20;
       }
-    },
+    }
   },
   extraReducers: (builder) => {
-    // Handle fetchCart
     builder
-      .addCase(fetchCart.pending, (state) => {
+      // Handle fetchCart
+      .addCase('cart/fetchCart/pending', (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCart.fulfilled, (state, action) => {
+      .addCase('cart/fetchCart/fulfilled', (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        state.items = action.payload.items;
+        state.totalAmount = action.payload.totalAmount;
+        state.shippingCharge = action.payload.shippingCharge;
         state.error = null;
       })
-      .addCase(fetchCart.rejected, (state, action) => {
+      .addCase('cart/fetchCart/rejected', (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to fetch cart';
       })
       
       // Handle addItemToCart
-      .addCase(addItemToCart.pending, (state) => {
+      .addCase('cart/addItemToCart/pending', (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(addItemToCart.fulfilled, (state, action) => {
+      .addCase('cart/addItemToCart/fulfilled', (state, action) => {
         state.loading = false;
-        // Replace the entire cart with the updated cart from the server
-        state.items = action.payload;
+        state.items = action.payload.items;
+        state.totalAmount = action.payload.totalAmount;
+        state.shippingCharge = action.payload.shippingCharge;
         state.error = null;
       })
-      .addCase(addItemToCart.rejected, (state, action) => {
+      .addCase('cart/addItemToCart/rejected', (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to add item to cart';
       })
       
       // Handle updateCartItemQuantity
-      .addCase(updateCartItemQuantity.pending, (state) => {
+      .addCase('cart/updateCartItemQuantity/pending', (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateCartItemQuantity.fulfilled, (state, action) => {
+      .addCase('cart/updateCartItemQuantity/fulfilled', (state, action) => {
         state.loading = false;
-        // Replace the entire cart with the updated cart from the server
-        state.items = action.payload;
+        state.items = action.payload.items;
+        state.totalAmount = action.payload.totalAmount;
+        state.shippingCharge = action.payload.shippingCharge;
         state.error = null;
       })
-      .addCase(updateCartItemQuantity.rejected, (state, action) => {
+      .addCase('cart/updateCartItemQuantity/rejected', (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to update cart item';
       })
       
       // Handle removeCartItem
-      .addCase(removeCartItem.pending, (state) => {
+      .addCase('cart/removeCartItem/pending', (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(removeCartItem.fulfilled, (state, action) => {
+      .addCase('cart/removeCartItem/fulfilled', (state, action) => {
         state.loading = false;
-        // Remove the item from the cart
-        state.items = state.items.filter(item => item.id !== action.payload);
+        state.items = action.payload.items;
+        state.totalAmount = action.payload.totalAmount;
+        state.shippingCharge = action.payload.shippingCharge;
         state.error = null;
       })
-      .addCase(removeCartItem.rejected, (state, action) => {
+      .addCase('cart/removeCartItem/rejected', (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to remove cart item';
       })
       
       // Handle clearCart
-      .addCase(clearCart.pending, (state) => {
+      .addCase('cart/clearCart/pending', (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(clearCart.fulfilled, (state) => {
+      .addCase('cart/clearCart/fulfilled', (state, action) => {
         state.loading = false;
         state.items = [];
         state.totalAmount = 0;
         state.shippingCharge = 0;
         state.error = null;
       })
-      .addCase(clearCart.rejected, (state, action) => {
+      .addCase('cart/clearCart/rejected', (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to clear cart';
       });
-  },
+  }
 });
 
 export const { calculateTotals } = cartSlice.actions;
-
 export default cartSlice.reducer;

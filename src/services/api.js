@@ -6,16 +6,30 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://app.hashtagfashionbran
 // Create HTTP client instance
 const api = createHttpClient(API_URL);
 
-// Transform product response to include image URL
+// Transform product response to include image URL and format color variants
 const transformProductResponse = (response) => {
   if (response.data) {
     if (Array.isArray(response.data)) {
       response.data = response.data.map(product => ({
         ...product,
-        image_url: product.image ? `${API_URL}/storage/${product.image}` : null
+        image_url: product.image ? `${API_URL}/storage/${product.image}` : null,
+        colorVariants: product.colorVariants ? product.colorVariants.map(variant => ({
+          ...variant,
+          image_url: variant.image ? `${API_URL}/storage/${variant.image}` : null,
+          price: parseFloat(variant.price || product.price),
+          stock: parseInt(variant.stock || product.stock)
+        })) : []
       }));
     } else {
       response.data.image_url = response.data.image ? `${API_URL}/storage/${response.data.image}` : null;
+      if (response.data.colorVariants) {
+        response.data.colorVariants = response.data.colorVariants.map(variant => ({
+          ...variant,
+          image_url: variant.image ? `${API_URL}/storage/${variant.image}` : null,
+          price: parseFloat(variant.price || response.data.price),
+          stock: parseInt(variant.stock || response.data.stock)
+        }));
+      }
     }
   }
   return response;
