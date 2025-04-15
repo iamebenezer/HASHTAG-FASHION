@@ -7,6 +7,7 @@ import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
 import Loader from "../../Loader"; 
 import { getCache, setCache } from "../../../utils/cache";
+import { formatPrice } from "../../../utils/format";
 
 const Caps = () => {
   const [caps, setCaps] = useState([]);
@@ -135,7 +136,7 @@ const Caps = () => {
                   _id={product.id}
                   img={product.image_url || `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/storage/${product.image}`}
                   productName={product.name}
-                  price={product.price}
+                  price={formatPrice(product.price)}
                   color={product.color || "Various"}
                   badge={product.badge || false}
                   des={product.description || ""}

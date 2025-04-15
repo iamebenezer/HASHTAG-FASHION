@@ -137,7 +137,7 @@ const Product = (props) => {
           <h2 className="text-lg text-primeColor font-bold">
             {props.productName}
           </h2>
-          <p className="text-[#767676] text-[14px]">₦{props.price}</p>
+          <p className="text-[#767676] text-[14px]">{props.price}</p>
         </div>
         <div>
           <p className="text-[#767676] text-[14px]">

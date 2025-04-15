@@ -5,6 +5,7 @@ import ProductBanner from "../../components/pageProps/shopPage/ProductBanner";
 import ShopSideNav from "../../components/pageProps/shopPage/ShopSideNav";
 import apiService from "../../services/api";
 import { getCache, setCache } from "../../utils/cache";
+import { formatPrice } from "../../utils/format";
 
 const Shop = () => {
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -40,7 +41,7 @@ const Shop = () => {
           _id: product.id,
           img: product.image_url || '/default-product-image.jpg',
           productName: product.name,
-          price: product.price,
+          price: formatPrice(product.price),
           des: product.description,
           color: product.color || 'N/A',
           badge: product.badge || false
