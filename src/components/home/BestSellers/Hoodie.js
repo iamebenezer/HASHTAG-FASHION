@@ -130,6 +130,8 @@ const Hoodie = () => {
             {hoodies.map((product) => (
               <div key={product.id} className="px-2">
                 <Product
+                  id={product.id}
+                  _id={product.id}
                   img={product.image_url || `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/storage/${product.image}`}
                   productName={product.name}
                   price={product.price}

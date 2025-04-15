@@ -36,12 +36,12 @@ const ProductDetails = () => {
       setLoading(true);
       const productData = await apiService.products.getById(id);
       console.log("Fetched product:", productData);
-      
-      setProduct(productData);
-      
+      // If the product is wrapped in a data property, unwrap it
+      const productObj = productData.data ? productData.data : productData;
+      setProduct(productObj);
       // Set default color variant if available
-      if (productData.color_variants && productData.color_variants.length > 0) {
-        setSelectedColor(productData.color_variants[0]);
+      if (productObj.color_variants && productObj.color_variants.length > 0) {
+        setSelectedColor(productObj.color_variants[0]);
       }
     } catch (err) {
       console.error("Error fetching product:", err);
@@ -71,7 +71,7 @@ const ProductDetails = () => {
         id: product.id,
         productName: product.name,
         price: price,
-        img: product.image_url || `${process.env.REACT_APP_API_URL || 'https://app.hashtagfashionbrand.com'}/storage/${product.image}`,
+        img: product.image_url || `https://admin.hashtagfashionbrand.com/storage/${product.image}`,
         color: selectedColor?.color_name || "Default",
         color_variant_id: selectedColor?.id || null,
         quantity: quantity,
@@ -117,7 +117,8 @@ const ProductDetails = () => {
     if (imagePath.startsWith('http')) {
       return imagePath;
     }
-    return `${process.env.REACT_APP_API_URL || 'https://app.hashtagfashionbrand.com'}/storage/${imagePath}`;
+    // Always use admin.hashtagfashionbrand.com as base
+    return `https://admin.hashtagfashionbrand.com/storage/${imagePath}`;
   };
 
   return (

@@ -24,7 +24,7 @@ const Product = (props) => {
   useEffect(() => {
     const fetchColorVariants = async () => {
       try {
-        const product = await apiService.products.getById(props._id);
+        const product = await apiService.products.getById(props.id || props._id);
         if (product && product.color_variants && product.color_variants.length > 0) {
           console.log("Fetched color variants:", product.color_variants);
           setColorVariants(product.color_variants);
@@ -36,13 +36,14 @@ const Product = (props) => {
     };
     
     fetchColorVariants();
-  }, [props._id]);
+  }, [props.id, props._id]);
   
   // Use the actual product ID for navigation instead of the product name
   const handleProductDetails = () => {
-    navigate(`/product/${props._id}`, {
+    const productId = props.id || props._id;
+    navigate(`/product/${productId}`, {
       state: {
-        item: productItem,
+        item: { ...props, id: productId },
       },
     });
   };
@@ -65,7 +66,7 @@ const Product = (props) => {
       
       // Add to local cart context
       const cartItem = {
-        id: props._id,
+        id: props.id || props._id,
         productName: props.productName,
         price: props.price,
         img: props.img,
