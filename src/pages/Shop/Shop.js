@@ -4,6 +4,7 @@ import Pagination from "../../components/pageProps/shopPage/Pagination";
 import ProductBanner from "../../components/pageProps/shopPage/ProductBanner";
 import ShopSideNav from "../../components/pageProps/shopPage/ShopSideNav";
 import apiService from "../../services/api";
+import { getCache, setCache } from "../../utils/cache";
 
 const Shop = () => {
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -17,22 +18,24 @@ const Shop = () => {
       try {
         setLoading(true);
         setError(null);
-        
+        const cacheKey = selectedCategory ? `products_category_${selectedCategory}` : 'products_all';
+        const cached = getCache(cacheKey);
+        if (cached) {
+          setProducts(cached);
+          setLoading(false);
+          return;
+        }
         let response;
         if (selectedCategory) {
           response = await apiService.products.getByCategory(selectedCategory);
         } else {
           response = await apiService.products.getAll();
         }
-        
         let productsData = Array.isArray(response) ? response : 
                          (response && Array.isArray(response.data) ? response.data : []);
-        
         if (!productsData || !Array.isArray(productsData)) {
           throw new Error('Invalid products data format');
         }
-
-        // Transform API response to match Product component expectations
         productsData = productsData.map(product => ({
           _id: product.id,
           img: product.image_url || '/default-product-image.jpg',
@@ -42,8 +45,8 @@ const Shop = () => {
           color: product.color || 'N/A',
           badge: product.badge || false
         }));
-
         setProducts(productsData);
+        setCache(cacheKey, productsData, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching products:', err);
         setError(err.message || 'Failed to fetch products');

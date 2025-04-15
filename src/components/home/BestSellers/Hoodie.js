@@ -5,7 +5,8 @@ import Product from "../Products/Product";
 import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
-import Loader from '../../Loader'; // Import the Loader component
+import Loader from '../../Loader'; 
+import { getCache, setCache } from "../../../utils/cache";
 
 const Hoodie = () => {
   const [hoodies, setHoodies] = useState([]);
@@ -17,7 +18,13 @@ const Hoodie = () => {
       try {
         setLoading(true);
         setError(null);
-        
+        const cacheKey = 'bestsellers_hoodies';
+        const cached = getCache(cacheKey);
+        if (cached) {
+          setHoodies(cached);
+          setLoading(false);
+          return;
+        }
         // Fetch categories
         const categories = await apiService.categories.getAll();
         if (!categories || !Array.isArray(categories)) {
@@ -64,6 +71,7 @@ const Hoodie = () => {
         });
 
         setHoodies(uniqueHoodies);
+        setCache(cacheKey, uniqueHoodies, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching hoodies:', err);
         setError(err.message || 'Failed to fetch hoodies');

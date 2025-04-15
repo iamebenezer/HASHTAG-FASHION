@@ -6,6 +6,7 @@ import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
 import Loader from "../../Loader"; 
+import { getCache, setCache } from "../../../utils/cache";
 
 const Pants = () => {
   const [pants, setPants] = useState([]);
@@ -17,7 +18,13 @@ const Pants = () => {
       try {
         setLoading(true);
         setError(null);
-        
+        const cacheKey = 'bestsellers_pants';
+        const cached = getCache(cacheKey);
+        if (cached) {
+          setPants(cached);
+          setLoading(false);
+          return;
+        }
         // Fetch categories
         const categories = await apiService.categories.getAll();
         if (!categories || !Array.isArray(categories)) {
@@ -64,6 +71,7 @@ const Pants = () => {
         });
 
         setPants(uniquePants);
+        setCache(cacheKey, uniquePants, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching pants:', err);
         setError(err.message || 'Failed to fetch pants');

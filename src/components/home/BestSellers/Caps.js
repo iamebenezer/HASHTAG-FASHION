@@ -5,7 +5,8 @@ import Product from "../Products/Product";
 import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
-import Loader from "../../Loader"; // Import the Loader component
+import Loader from "../../Loader"; 
+import { getCache, setCache } from "../../../utils/cache";
 
 const Caps = () => {
   const [caps, setCaps] = useState([]);
@@ -17,15 +18,19 @@ const Caps = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch categories
+        const cacheKey = 'bestsellers_caps';
+        const cached = getCache(cacheKey);
+        if (cached) {
+          setCaps(cached);
+          setLoading(false);
+          return;
+        }
         const categories = await apiService.categories.getAll();
         if (!categories || !Array.isArray(categories)) {
           console.log("Categories response:", categories);
           throw new Error('Invalid categories data received');
         }
 
-        // Find caps category
         const capsCategory = categories.find(cat => 
           cat.name.toLowerCase().includes('cap')
         );
@@ -36,10 +41,8 @@ const Caps = () => {
           return;
         }
 
-        // Fetch products for caps category
         const products = await apiService.products.getByCategory(capsCategory.id);
         
-        // Handle the case where products might be nested in a data property
         const capsProducts = Array.isArray(products) ? products : 
                             (products && Array.isArray(products.data) ? products.data : []);
         
@@ -48,12 +51,10 @@ const Caps = () => {
           throw new Error('Invalid products data format');
         }
 
-        // Remove duplicates and invalid products
         const validProducts = capsProducts.filter(product => 
           product && product.id && product.name && product.price
         );
         
-        // Create a Set of product IDs to ensure uniqueness
         const uniqueProductIds = new Set();
         const uniqueCaps = validProducts.filter(product => {
           if (uniqueProductIds.has(product.id)) {
@@ -64,6 +65,7 @@ const Caps = () => {
         });
 
         setCaps(uniqueCaps);
+        setCache(cacheKey, uniqueCaps, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching caps:', err);
         setError(err.message || 'Failed to fetch caps');
@@ -76,7 +78,6 @@ const Caps = () => {
     fetchCaps();
   }, []);
 
-  // Determine if we should use infinite mode based on the number of products
   const shouldUseInfinite = caps.length > 4;
 
   const settings = {

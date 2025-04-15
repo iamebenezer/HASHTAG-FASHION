@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Breadcrumbs from "../../components/pageProps/Breadcrumbs";
 import Image from "../../components/designLayouts/Image";
 import apiService from "../../services/api";
+import { getCache, setCache } from "../../utils/cache";
 import { useCart } from "../../context/CartContext";
 import { FaShoppingCart } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
@@ -34,11 +35,23 @@ const ProductDetails = () => {
   const fetchProductDetails = async (id) => {
     try {
       setLoading(true);
+      const cacheKey = `product_${id}`;
+      const cached = getCache(cacheKey);
+      if (cached) {
+        setProduct(cached);
+        // Set default color variant if available
+        if (cached.color_variants && cached.color_variants.length > 0) {
+          setSelectedColor(cached.color_variants[0]);
+        }
+        setLoading(false);
+        return;
+      }
       const productData = await apiService.products.getById(id);
       console.log("Fetched product:", productData);
       // If the product is wrapped in a data property, unwrap it
       const productObj = productData.data ? productData.data : productData;
       setProduct(productObj);
+      setCache(cacheKey, productObj, 600000); // 10 minutes
       // Set default color variant if available
       if (productObj.color_variants && productObj.color_variants.length > 0) {
         setSelectedColor(productObj.color_variants[0]);

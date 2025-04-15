@@ -5,7 +5,8 @@ import Product from "../Products/Product";
 import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
-import Loader from "../../Loader"; // Import the Loader component
+import Loader from "../../Loader"; 
+import { getCache, setCache } from "../../../utils/cache";
 
 const Tops = () => {
   const [tops, setTops] = useState([]);
@@ -17,8 +18,13 @@ const Tops = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch categories
+        const cacheKey = 'bestsellers_tops';
+        const cached = getCache(cacheKey);
+        if (cached) {
+          setTops(cached);
+          setLoading(false);
+          return;
+        }
         const categories = await apiService.categories.getAll();
         if (!categories || !Array.isArray(categories)) {
           console.log("Categories response:", categories);
@@ -64,6 +70,7 @@ const Tops = () => {
         });
 
         setTops(uniqueTops);
+        setCache(cacheKey, uniqueTops, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching tops:', err);
         setError(err.message || 'Failed to fetch tops');
