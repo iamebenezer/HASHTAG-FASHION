@@ -48,3 +48,8 @@ nav .active li {
 .font-bodyFont{
   letter-spacing: 1px;
 }
+
+/* Hide slick slider dots globally */
+.slick-dots {
+  display: none !important;
+}

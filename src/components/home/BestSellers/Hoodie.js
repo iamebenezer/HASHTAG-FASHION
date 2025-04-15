@@ -5,6 +5,7 @@ import Product from "../Products/Product";
 import { apiService } from "../../../services/api";
 import SampleNextArrow from "../NewArrivals/SampleNextArrow";
 import SamplePrevArrow from "../NewArrivals/SamplePrevArrow";
+import Loader from '../../Loader'; // Import the Loader component
 
 const Hoodie = () => {
   const [hoodies, setHoodies] = useState([]);
@@ -119,7 +120,7 @@ const Hoodie = () => {
       <Heading heading="Hoodies" />
       <div className="w-full">
         {loading ? (
-          <div className="text-center py-10">Loading hoodies...</div>
+          <Loader height={200} />
         ) : error ? (
           <div className="text-center text-red-500 py-10">{error}</div>
         ) : hoodies.length === 0 ? (
@@ -129,7 +130,6 @@ const Hoodie = () => {
             {hoodies.map((product) => (
               <div key={product.id} className="px-2">
                 <Product
-                  _id={product.id}
                   img={product.image_url || `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/storage/${product.image}`}
                   productName={product.name}
                   price={product.price}

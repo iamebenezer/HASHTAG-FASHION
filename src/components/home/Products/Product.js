@@ -15,6 +15,7 @@ const Product = (props) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [colorVariants, setColorVariants] = useState([]);
   const [hasColorVariants, setHasColorVariants] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const productItem = props;
@@ -96,7 +97,7 @@ const Product = (props) => {
       
       <div className="max-w-80 max-h-80 relative overflow-y-hidden cursor-pointer" onClick={handleProductDetails}>
         <div>
-          <Image className="w-full h-full" imgSrc={props.img} />
+          <Image className="w-full h-full" imgSrc={props.img} onLoad={() => setImageLoaded(true)} />
         </div>
         <div className="absolute top-6 left-8">
           {props.badge && <Badge text="New" />}

@@ -1,7 +1,7 @@
 import createHttpClient from './httpClient';
 
 // Use the correct API URL based on environment
-const API_URL = process.env.REACT_APP_API_URL || 'https://app.hashtagfashionbrand.com';
+const API_URL = process.env.REACT_APP_API_URL || 'https://admin.hashtagfashionbrand.com';
 
 // Create HTTP client instance
 const api = createHttpClient(API_URL);

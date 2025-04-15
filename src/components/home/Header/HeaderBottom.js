@@ -117,10 +117,10 @@ const HeaderBottom = () => {
             <FaSearch className="w-5 h-5" />
             {searchQuery && (
               <div
-                className={`w-full mx-auto h-96 bg-white top-16 absolute left-0 z-50 overflow-y-scroll shadow-2xl scrollbar-hide cursor-pointer`}
+                className={`w-full mx-auto max-h-96 bg-white top-16 absolute left-0 z-50 overflow-y-scroll shadow-2xl scrollbar-hide cursor-pointer`}
               >
                 {isSearching ? (
-                  <div className="w-full h-full flex justify-center items-center">
+                  <div className="w-full h-full flex justify-center items-center py-10">
                     <p className="text-lg font-semibold text-primeColor">Searching...</p>
                   </div>
                 ) : filteredProducts.length > 0 ? (
@@ -128,14 +128,14 @@ const HeaderBottom = () => {
                     <div
                       onClick={() => handleProductClick(item)}
                       key={item.id}
-                      className="max-w-[600px] h-28 bg-gray-100 mb-3 flex items-center gap-3 px-4 hover:bg-gray-200 transition-all duration-300"
+                      className="w-full h-auto md:h-28 bg-gray-100 mb-3 flex flex-col md:flex-row items-center gap-3 px-4 py-3 md:py-0 hover:bg-gray-200 transition-all duration-300"
                     >
-                      <img className="w-24 h-24 object-contain" src={item.image_url} alt={item.name} />
-                      <div className="flex flex-col gap-1">
-                        <p className="font-semibold text-lg">
+                      <img className="w-16 h-16 md:w-24 md:h-24 object-contain" src={item.image_url} alt={item.name} />
+                      <div className="flex flex-col gap-1 w-full md:w-auto text-center md:text-left">
+                        <p className="font-semibold text-base md:text-lg truncate">
                           {item.name}
                         </p>
-                        <p className="text-xs line-clamp-2">{item.description}</p>
+                        <p className="text-xs line-clamp-2 hidden md:block">{item.description}</p>
                         <p className="text-sm">
                           Price:{" "}
                           <span className="text-primeColor font-semibold">
@@ -146,7 +146,7 @@ const HeaderBottom = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="w-full h-full flex justify-center items-center">
+                  <div className="w-full h-full flex justify-center items-center py-10">
                     <p className="text-lg font-semibold text-gray-500">No products found</p>
                   </div>
                 )}
