@@ -1,6 +1,7 @@
 import React from "react";
 import { ImCross } from "react-icons/im";
 import { useCart } from "../../context/CartContext";
+import { formatPrice } from "../../utils/format";
 
 const ItemCard = ({ item, onUpdate }) => {
   const { removeFromCart, updateQuantity } = useCart();
@@ -56,7 +57,7 @@ const ItemCard = ({ item, onUpdate }) => {
 
       <div className="col-span-5 mdl:col-span-3 flex items-center justify-between py-4 mdl:py-0 px-4 mdl:px-0 gap-6 mdl:gap-0">
         <div className="flex w-1/3 items-center text-lg font-semibold">
-          ₦{typeof item.price === 'string' ? item.price : item.price.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+          {formatPrice(item.price)}
         </div>
 
         <div className="w-1/3 flex items-center gap-6 text-lg">
@@ -80,13 +81,12 @@ const ItemCard = ({ item, onUpdate }) => {
             {(() => {
               let price = item.price;
               if (typeof price === 'string') {
-                // Remove any currency symbols and commas
                 price = price.replace(/₦/g, '').replace(/,/g, '');
               }
               price = parseFloat(price);
-              if (isNaN(price)) return '₦0.00';
+              if (isNaN(price)) return formatPrice(0);
               const total = price * item.quantity;
-              return `₦${total.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+              return formatPrice(total);
             })()}
           </p>
         </div>

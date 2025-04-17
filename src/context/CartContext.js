@@ -137,10 +137,15 @@ export const CartProvider = ({ children }) => {
   
   // Recalculate totals when items change
   useEffect(() => {
-    const totalItems = state.items.reduce((total, item) => total + item.quantity, 0);
+    const totalItems = state.items.reduce((total, item) => total + (parseInt(item.quantity) || 0), 0);
     const totalPrice = state.items.reduce((total, item) => {
-      const price = parseFloat(item.price.toString().replace(/,/g, ''));
-      return total + (price * item.quantity);
+      let price = item.price;
+      if (typeof price === 'string') {
+        price = price.replace(/₦/g, '').replace(/,/g, '');
+      }
+      price = parseFloat(price);
+      if (isNaN(price)) price = 0;
+      return total + (price * (parseInt(item.quantity) || 0));
     }, 0);
     
     if (totalItems !== state.totalItems || totalPrice !== state.totalPrice) {
