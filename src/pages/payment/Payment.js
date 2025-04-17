@@ -204,15 +204,10 @@ const Payment = () => {
     }));
 
     return {
-      customer: {
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city || '',
-        state: formData.state || '',
-        zip_code: formData.zipCode || ''
-      },
+      customerName: formData.fullName,
+      customerEmail: formData.email,
+      customerPhone: formData.phone,
+      shippingAddress: `${formData.address}${formData.city ? ', ' + formData.city : ''}${formData.state ? ', ' + formData.state : ''}${formData.zipCode ? ' ' + formData.zipCode : ''}`,
       items: formattedItems,
       payment_method: formData.paymentMethod,
       payment_reference: reference,

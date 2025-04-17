@@ -35,10 +35,10 @@ const Cart = () => {
           <div className="max-w-7xl gap-4 flex justify-end mt-4">
             <div className="w-96 flex flex-col gap-4">
               <h1 className="text-2xl font-semibold text-right">Cart totals</h1>
-              <div>
-                <p className="flex items-center justify-between border-[1px] border-gray-400 border-b-0 py-1.5 text-lg px-4 font-medium">
-                  Subtotal{" "}
-                  <span className="font-semibold tracking-wide font-titleFont">
+              <div className="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+                <p className="flex items-center justify-between border-b border-gray-200 py-2 text-lg px-4 font-medium whitespace-nowrap overflow-x-auto">
+                  Subtotal
+                  <span className="font-semibold tracking-wide font-titleFont truncate max-w-[120px] block text-right">
                     {(() => {
                       let total = cart.totalPrice;
                       if (typeof total === 'string') {
@@ -50,9 +50,9 @@ const Cart = () => {
                     })()}
                   </span>
                 </p>
-                <p className="flex items-center justify-between border-[1px] border-gray-400 py-1.5 text-lg px-4 font-bold">
-                  Total{" "}
-                  <span className="font-bold tracking-wide text-lg font-titleFont">
+                <p className="flex items-center justify-between py-2 text-lg px-4 font-bold whitespace-nowrap overflow-x-auto">
+                  Total
+                  <span className="font-bold tracking-wide text-lg font-titleFont truncate max-w-[120px] block text-right">
                     {(() => {
                       let total = cart.totalPrice;
                       if (typeof total === 'string') {
