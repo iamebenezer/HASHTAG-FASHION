@@ -38,10 +38,16 @@ const ItemCard = ({ item, onUpdate }) => {
                 <span 
                   className="inline-block w-3 h-3 rounded-full border border-gray-300" 
                   style={{ 
-                    backgroundColor: item.color.startsWith('#') ? item.color : undefined
+                    backgroundColor: item.color && item.color.startsWith('#') ? item.color : undefined
                   }}
                 ></span>
                 <span>{item.color}</span>
+              </span>
+            )}
+            {item.size && (
+              <span className="flex items-center gap-1 ml-4">
+                <span>Size:</span>
+                <span className="inline-block px-2 py-1 bg-gray-200 text-xs rounded">{item.size}</span>
               </span>
             )}
           </p>
@@ -70,7 +76,19 @@ const ItemCard = ({ item, onUpdate }) => {
         </div>
 
         <div className="w-1/3 flex items-center font-titleFont font-bold text-lg">
-          <p>₦{(typeof item.price === 'string' ? parseFloat(item.price.replace(/,/g, '')) * item.quantity : item.price * item.quantity).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+          <p>
+            {(() => {
+              let price = item.price;
+              if (typeof price === 'string') {
+                // Remove any currency symbols and commas
+                price = price.replace(/₦/g, '').replace(/,/g, '');
+              }
+              price = parseFloat(price);
+              if (isNaN(price)) return '₦0.00';
+              const total = price * item.quantity;
+              return `₦${total.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            })()}
+          </p>
         </div>
       </div>
     </div>

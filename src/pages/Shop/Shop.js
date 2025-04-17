@@ -6,6 +6,7 @@ import ShopSideNav from "../../components/pageProps/shopPage/ShopSideNav";
 import apiService from "../../services/api";
 import { getCache, setCache } from "../../utils/cache";
 import { formatPrice } from "../../utils/format";
+import Product from "../../components/home/Products/Product";
 
 const Shop = () => {
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -22,7 +23,12 @@ const Shop = () => {
         const cacheKey = selectedCategory ? `products_category_${selectedCategory}` : 'products_all';
         const cached = getCache(cacheKey);
         if (cached) {
-          setProducts(cached);
+          // Ensure cached products have colorVariants normalized just like ProductDetails.js
+          const normalized = cached.map(product => ({
+            ...product,
+            colorVariants: product.colorVariants || product.color_variants || [],
+          }));
+          setProducts(normalized);
           setLoading(false);
           return;
         }
@@ -32,20 +38,30 @@ const Shop = () => {
         } else {
           response = await apiService.products.getAll();
         }
+        // --- Unwrap API response like ProductDetails.js
         let productsData = Array.isArray(response) ? response : 
                          (response && Array.isArray(response.data) ? response.data : []);
         if (!productsData || !Array.isArray(productsData)) {
           throw new Error('Invalid products data format');
         }
+        // Normalize colorVariants for each product exactly like ProductDetails.js
         productsData = productsData.map(product => ({
-          _id: product.id,
-          img: product.image_url || '/default-product-image.jpg',
-          productName: product.name,
-          price: formatPrice(product.price),
-          des: product.description,
-          color: product.color || 'N/A',
-          badge: product.badge || false
+          ...product,
+          colorVariants: product.colorVariants || product.color_variants || [],
         }));
+        // Pass ALL product properties to Product card
+        productsData = productsData.map(product => {
+          return {
+            ...product,
+            _id: product.id,
+            img: product.image_url || product.image || '/default-product-image.jpg',
+            productName: product.name,
+            price: formatPrice(product.price),
+            des: product.description,
+            color: product.color || 'N/A',
+            badge: product.badge || false,
+          };
+        });
         setProducts(productsData);
         setCache(cacheKey, productsData, 600000); // 10 minutes
       } catch (err) {
@@ -82,6 +98,7 @@ const Shop = () => {
             itemsPerPage={itemsPerPage}
             loading={loading}
             error={error}
+            ProductComponent={Product}
           />
         </div>
       </div>

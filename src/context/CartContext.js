@@ -27,11 +27,12 @@ const cartReducer = (state, action) => {
   
   switch (action.type) {
     case 'ADD_TO_CART':
-      // Check for existing item with same ID and color variant
+      // Check for existing item with same ID, color variant, and size variant
       const existingItemIndex = state.items.findIndex(
         item => item.id === action.payload.id && 
                item.color === action.payload.color &&
-               (item.color_variant_id === action.payload.color_variant_id)
+               (item.color_variant_id === action.payload.color_variant_id) &&
+               (item.size_variant_id === action.payload.size_variant_id)
       );
       
       if (existingItemIndex !== -1) {
@@ -49,10 +50,12 @@ const cartReducer = (state, action) => {
           totalPrice: state.totalPrice + (parseFloat(action.payload.price.toString().replace(/,/g, '')) * action.payload.quantity)
         };
       } else {
-        // Add new item - ensure color_variant_id is included if present
+        // Add new item - ensure color_variant_id and size_variant_id are included if present
         const newItem = {
           ...action.payload,
-          color_variant_id: action.payload.color_variant_id || null
+          color_variant_id: action.payload.color_variant_id || null,
+          size: action.payload.size || null,
+          size_variant_id: action.payload.size_variant_id || null
         };
         
         newState = {
@@ -68,7 +71,8 @@ const cartReducer = (state, action) => {
       const itemToRemove = state.items.find(item => 
         item.id === action.payload.id && 
         item.color === action.payload.color &&
-        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true)
+        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true) &&
+        (action.payload.size_variant_id ? item.size_variant_id === action.payload.size_variant_id : true)
       );
       
       if (!itemToRemove) return state;
@@ -78,7 +82,8 @@ const cartReducer = (state, action) => {
         items: state.items.filter(item => 
           !(item.id === action.payload.id && 
             item.color === action.payload.color &&
-            (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true))
+            (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true) &&
+            (action.payload.size_variant_id ? item.size_variant_id === action.payload.size_variant_id : true))
         ),
         totalItems: state.totalItems - itemToRemove.quantity,
         totalPrice: state.totalPrice - (parseFloat(itemToRemove.price.toString().replace(/,/g, '')) * itemToRemove.quantity)
@@ -89,7 +94,8 @@ const cartReducer = (state, action) => {
       const itemIndex = state.items.findIndex(item => 
         item.id === action.payload.id && 
         item.color === action.payload.color &&
-        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true)
+        (action.payload.color_variant_id ? item.color_variant_id === action.payload.color_variant_id : true) &&
+        (action.payload.size_variant_id ? item.size_variant_id === action.payload.size_variant_id : true)
       );
       
       if (itemIndex === -1) return state;
@@ -151,10 +157,12 @@ export const CartProvider = ({ children }) => {
   const addToCart = (item) => {
     if (!item.quantity) item.quantity = 1;
     
-    // Ensure color_variant_id is included if available
+    // Ensure color_variant_id and size_variant_id are included if available
     const cartItem = {
       ...item,
-      color_variant_id: item.color_variant_id || null
+      color_variant_id: item.color_variant_id || null,
+      size: item.size || null,
+      size_variant_id: item.size_variant_id || null
     };
     
     dispatch({
@@ -163,17 +171,17 @@ export const CartProvider = ({ children }) => {
     });
   };
   
-  const removeFromCart = (id, color, color_variant_id = null) => {
+  const removeFromCart = (id, color, color_variant_id = null, size_variant_id = null) => {
     dispatch({
       type: 'REMOVE_FROM_CART',
-      payload: { id, color, color_variant_id }
+      payload: { id, color, color_variant_id, size_variant_id }
     });
   };
   
-  const updateQuantity = (id, color, quantity, color_variant_id = null) => {
+  const updateQuantity = (id, color, quantity, color_variant_id = null, size_variant_id = null) => {
     dispatch({
       type: 'UPDATE_QUANTITY',
-      payload: { id, color, quantity, color_variant_id }
+      payload: { id, color, quantity, color_variant_id, size_variant_id }
     });
   };
   

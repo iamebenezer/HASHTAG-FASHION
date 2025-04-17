@@ -34,7 +34,7 @@ const Tops = () => {
 
         // Find tops category
         const topsCategory = categories.find(cat => 
-          cat.name.toLowerCase().includes('top')
+          cat.name === 'Tops'
         );
 
         if (!topsCategory) {
@@ -59,10 +59,14 @@ const Tops = () => {
         const validProducts = topsProducts.filter(product => 
           product && product.id && product.name && product.price
         );
-        
+        // Normalize colorVariants for each product like ProductDetails.js
+        const normalizedProducts = validProducts.map(product => ({
+          ...product,
+          colorVariants: product.colorVariants || product.color_variants || [],
+        }));
         // Create a Set of product IDs to ensure uniqueness
         const uniqueProductIds = new Set();
-        const uniqueTops = validProducts.filter(product => {
+        const uniqueTops = normalizedProducts.filter(product => {
           if (uniqueProductIds.has(product.id)) {
             return false;
           }

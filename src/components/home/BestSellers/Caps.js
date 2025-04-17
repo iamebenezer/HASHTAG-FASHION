@@ -33,7 +33,7 @@ const Caps = () => {
         }
 
         const capsCategory = categories.find(cat => 
-          cat.name.toLowerCase().includes('cap')
+          cat.name === 'Caps'
         );
 
         if (!capsCategory) {
@@ -65,8 +65,14 @@ const Caps = () => {
           return true;
         });
 
-        setCaps(uniqueCaps);
-        setCache(cacheKey, uniqueCaps, 600000); // 10 minutes
+        // Normalize colorVariants for each product like ProductDetails.js
+        const normalizedProducts = uniqueCaps.map(product => ({
+          ...product,
+          colorVariants: product.colorVariants || product.color_variants || [],
+        }));
+
+        setCaps(normalizedProducts);
+        setCache(cacheKey, normalizedProducts, 600000); // 10 minutes
       } catch (err) {
         console.error('Error fetching caps:', err);
         setError(err.message || 'Failed to fetch caps');

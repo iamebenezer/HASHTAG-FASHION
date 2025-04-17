@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, memo } from "react";
 import { BsSuitHeartFill } from "react-icons/bs";
 import { GiReturnArrow } from "react-icons/gi";
 import { FaShoppingCart } from "react-icons/fa";
@@ -11,33 +11,19 @@ import apiService from "../../../services/api";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Product = (props) => {
+const Product = memo((props) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [colorVariants, setColorVariants] = useState([]);
-  const [hasColorVariants, setHasColorVariants] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const productItem = props;
-  
-  // Fetch color variants when component mounts
-  useEffect(() => {
-    const fetchColorVariants = async () => {
-      try {
-        const product = await apiService.products.getById(props.id || props._id);
-        if (product && product.color_variants && product.color_variants.length > 0) {
-          console.log("Fetched color variants:", product.color_variants);
-          setColorVariants(product.color_variants);
-          setHasColorVariants(true);
-        }
-      } catch (error) {
-        console.error("Error fetching color variants:", error);
-      }
-    };
-    
-    fetchColorVariants();
-  }, [props.id, props._id]);
-  
+
+  // Use colorVariants directly from props, fallback to color_variants (API snake_case)
+  const colorVariants = props.colorVariants && Array.isArray(props.colorVariants) && props.colorVariants.length > 0
+    ? props.colorVariants
+    : (props.color_variants && Array.isArray(props.color_variants) ? props.color_variants : []);
+  const hasColorVariants = colorVariants.length > 0;
+
   // Use the actual product ID for navigation instead of the product name
   const handleProductDetails = () => {
     const productId = props.id || props._id;
@@ -95,39 +81,47 @@ const Product = (props) => {
   return (
     <div className="w-full relative group">
       <ToastContainer position="top-right" autoClose={3000} />
-      
       <div className="max-w-80 max-h-80 relative overflow-y-hidden cursor-pointer" onClick={handleProductDetails}>
         <div>
           <Image className="w-full h-full" imgSrc={props.img} onLoad={() => setImageLoaded(true)} />
+          {!imageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 animate-pulse">
+              <div className="w-20 h-20 bg-gray-300 rounded-full" />
+            </div>
+          )}
         </div>
         <div className="absolute top-6 left-8">
           {props.badge && <Badge text="New" />}
         </div>
+        {/* Render color swatches if colorVariants exist */}
+        {hasColorVariants && (
+          <div className="flex gap-2 mt-2 px-2">
+            {colorVariants.map(variant => (
+              <span
+                key={variant.id}
+                style={{
+                  backgroundColor: variant.color_code,
+                  border: '1px solid #ccc',
+                  display: 'inline-block',
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                }}
+                title={variant.color_name}
+              />
+            ))}
+          </div>
+        )}
         <div className="w-full h-20 absolute bg-white -bottom-[80px] group-hover:bottom-0 duration-500">
           <ul className="w-full h-full flex flex-col items-end justify-center gap-2 font-titleFont px-2 border-l border-r">
             <li
               onClick={(e) => {
                 e.stopPropagation();
-                handleAddToCart(e);
-              }}
-              className={`text-[#767676] hover:text-primeColor text-sm font-normal border-b border-b-gray-200 hover:border-b-primeColor flex items-center justify-end gap-2 hover:cursor-pointer pb-1 duration-300 w-full ${isAddingToCart ? 'text-primeColor' : ''}`}
-            >
-              {isAddingToCart ? "Adding..." : hasColorVariants ? "Select Color Options" : "Add to Cart"}
-              <span>
-                <FaShoppingCart />
-              </span>
-            </li>
-            <li
-              onClick={(e) => {
-                e.stopPropagation();
                 handleProductDetails();
               }}
-              className="text-[#767676] hover:text-primeColor text-sm font-normal border-b border-b-gray-200 hover:border-b-primeColor flex items-center justify-end gap-2 hover:cursor-pointer pb-1 duration-300 w-full"
+              className="text-primeColor hover:text-black cursor-pointer flex items-center gap-1"
             >
-              View Details
-              <span className="text-lg">
-                <MdOutlineLabelImportant />
-              </span>
+              <MdOutlineLabelImportant /> Details
             </li>
           </ul>
         </div>
@@ -140,13 +134,12 @@ const Product = (props) => {
           <p className="text-[#767676] text-[14px]">{props.price}</p>
         </div>
         <div>
-          <p className="text-[#767676] text-[14px]">
-            {hasColorVariants ? `${colorVariants.length} Color Options Available` : props.color || "Default"}
-          </p>
+          {/* Hardcode color variant label for now */}
+          <p className="text-xs text-gray-600 mt-1">Multiple color variants</p>
         </div>
       </div>
     </div>
   );
-};
+});
 
 export default Product;

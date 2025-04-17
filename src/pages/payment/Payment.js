@@ -196,7 +196,11 @@ const Payment = () => {
       product_id: item.id,
       quantity: item.quantity,
       price: item.price,
-      subtotal: item.price * item.quantity
+      subtotal: item.price * item.quantity,
+      color: item.color,
+      color_variant_id: item.color_variant_id,
+      size: item.size,
+      size_variant_id: item.size_variant_id
     }));
 
     return {

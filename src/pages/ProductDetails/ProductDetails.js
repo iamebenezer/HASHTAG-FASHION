@@ -18,13 +18,45 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // Utility function to transform backend keys to frontend camelCase
+  const transformProduct = (product) => ({
+    ...product,
+    colorVariants: (product.color_variants || product.colorVariants || []).map(variant => ({
+      ...variant,
+      sizeVariants: variant.size_variants || variant.sizeVariants || []
+    }))
+  });
 
   useEffect(() => {
     if (location.state?.item) {
       const productData = location.state.item;
-      setProduct(productData);
+      setProduct({
+        ...productData,
+        colorVariants: productData.colorVariants || productData.color_variants || [],
+      });
+      fetchProductDetails(productData._id || productData.id);
+    } else {
+      const productId = location.pathname.split("/").pop();
+      fetchProductDetails(productId);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    // Reset selected size when color changes
+    setSelectedSize(null);
+  }, [selectedColor]);
+
+  useEffect(() => {
+    if (location.state?.item) {
+      const productData = location.state.item;
+      setProduct({
+        ...productData,
+        colorVariants: productData.colorVariants || productData.color_variants || [],
+      });
       fetchProductDetails(productData._id || productData.id);
     } else {
       const productId = location.pathname.split("/").pop();
@@ -38,23 +70,25 @@ const ProductDetails = () => {
       const cacheKey = `product_${id}`;
       const cached = getCache(cacheKey);
       if (cached) {
-        setProduct(cached);
+        const transformed = transformProduct(cached);
+        setProduct(transformed);
         // Set default color variant if available
-        if (cached.color_variants && cached.color_variants.length > 0) {
-          setSelectedColor(cached.color_variants[0]);
+        const variants = transformed.colorVariants || [];
+        if (variants.length > 0) {
+          setSelectedColor(variants[0]);
         }
         setLoading(false);
         return;
       }
       const productData = await apiService.products.getById(id);
-      console.log("Fetched product:", productData);
-      // If the product is wrapped in a data property, unwrap it
       const productObj = productData.data ? productData.data : productData;
-      setProduct(productObj);
-      setCache(cacheKey, productObj, 600000); // 10 minutes
+      const transformed = transformProduct(productObj);
+      setProduct(transformed);
+      setCache(cacheKey, transformed, 600000); // 10 minutes
       // Set default color variant if available
-      if (productObj.color_variants && productObj.color_variants.length > 0) {
-        setSelectedColor(productObj.color_variants[0]);
+      const variants = transformed.colorVariants || [];
+      if (variants.length > 0) {
+        setSelectedColor(variants[0]);
       }
     } catch (err) {
       console.error("Error fetching product:", err);
@@ -66,8 +100,13 @@ const ProductDetails = () => {
 
   const handleAddToCart = async () => {
     // If product has color variants but none selected, show error
-    if (product.color_variants && product.color_variants.length > 0 && !selectedColor) {
+    if (product.colorVariants && product.colorVariants.length > 0 && !selectedColor) {
       toast.error("Please select a color variant");
+      return;
+    }
+    // If color has size variants but none selected, show error
+    if (selectedColor && selectedColor.sizeVariants && selectedColor.sizeVariants.length > 0 && !selectedSize) {
+      toast.error("Please select a size");
       return;
     }
 
@@ -87,6 +126,8 @@ const ProductDetails = () => {
         img: product.image_url || `https://admin.hashtagfashionbrand.com/storage/${product.image}`,
         color: selectedColor?.color_name || "Default",
         color_variant_id: selectedColor?.id || null,
+        size: selectedSize?.size || null,
+        size_variant_id: selectedSize?.id || null,
         quantity: quantity,
         description: product.description || ""
       };
@@ -146,13 +187,12 @@ const ProductDetails = () => {
       
       <div className="w-full flex flex-col md:flex-row gap-10">
         {/* Product Image */}
-        <div className="w-full md:w-1/2">
-          <div className="border p-4">
-            <Image 
-              className="w-full h-auto" 
-              imgSrc={getImageUrl(product.image) || product.img} 
-            />
-          </div>
+        <div className="w-full md:w-1/2 flex items-center justify-center">
+          <Image 
+            className="w-full max-w-xs h-auto object-contain" 
+            imgSrc={getImageUrl(product.image) || product.img} 
+            loading="lazy"
+          />
         </div>
 
         {/* Product Details */}
@@ -162,11 +202,11 @@ const ProductDetails = () => {
             ₦{formatPrice(product.price)}
           </p>
           
-          {product.color_variants && product.color_variants.length > 0 && (
+          {product.colorVariants && product.colorVariants.length > 0 && (
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Select Color:</label>
               <div className="flex gap-2">
-                {product.color_variants.map((variant) => (
+                {product.colorVariants.map((variant) => (
                   <button
                     key={variant.id}
                     onClick={() => setSelectedColor(variant)}
@@ -182,6 +222,29 @@ const ProductDetails = () => {
               </div>
               {selectedColor && (
                 <p className="mt-2 text-sm text-gray-600">Selected: {selectedColor.color_name}</p>
+              )}
+            </div>
+          )}
+
+          {selectedColor && selectedColor.sizeVariants && selectedColor.sizeVariants.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Select Size:</label>
+              <div className="flex gap-2">
+                {selectedColor.sizeVariants.filter(sv => sv.is_active).map((sizeVar) => (
+                  <button
+                    key={sizeVar.id}
+                    onClick={() => setSelectedSize(sizeVar)}
+                    className={`px-4 py-2 rounded border-2 flex items-center justify-center cursor-pointer ${
+                      selectedSize?.id === sizeVar.id ? 'border-primeColor bg-primeColor text-white' : 'border-gray-300 bg-white text-black'
+                    }`}
+                    title={sizeVar.size}
+                  >
+                    {sizeVar.size}
+                  </button>
+                ))}
+              </div>
+              {selectedSize && (
+                <p className="mt-2 text-sm text-gray-600">Selected: {selectedSize.size}</p>
               )}
             </div>
           )}
@@ -221,6 +284,7 @@ const ProductDetails = () => {
             <ul className="space-y-2">
               <li><span className="font-medium">Category:</span> {product.category?.name || "Uncategorized"}</li>
               {selectedColor && <li><span className="font-medium">Color:</span> {selectedColor.color_name}</li>}
+              {selectedSize && <li><span className="font-medium">Size:</span> {selectedSize.size}</li>}
               {!selectedColor && product.color && <li><span className="font-medium">Color:</span> {product.color}</li>}
             </ul>
           </div>

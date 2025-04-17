@@ -35,7 +35,7 @@ const Hoodie = () => {
 
         // Find hoodies category
         const hoodiesCategory = categories.find(cat => 
-          cat.name.toLowerCase().includes('hoodie')
+          cat.name === 'Hoodies'
         );
 
         if (!hoodiesCategory) {
@@ -60,10 +60,14 @@ const Hoodie = () => {
         const validProducts = hoodiesProducts.filter(product => 
           product && product.id && product.name && product.price
         );
-        
+        // Normalize colorVariants for each product like ProductDetails.js
+        const normalizedProducts = validProducts.map(product => ({
+          ...product,
+          colorVariants: product.colorVariants || product.color_variants || [],
+        }));
         // Create a Set of product IDs to ensure uniqueness
         const uniqueProductIds = new Set();
-        const uniqueHoodies = validProducts.filter(product => {
+        const uniqueHoodies = normalizedProducts.filter(product => {
           if (uniqueProductIds.has(product.id)) {
             return false;
           }

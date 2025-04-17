@@ -104,6 +104,7 @@ const Orders = () => {
                         <tr>
                           <th className="text-left p-3">Item</th>
                           <th className="text-center p-3">Color</th>
+                          <th className="text-center p-3">Size</th>
                           <th className="text-center p-3">Qty</th>
                           <th className="text-right p-3">Price</th>
                         </tr>
@@ -128,6 +129,7 @@ const Orders = () => {
                                 </div>
                               )}
                             </td>
+                            <td className="p-3 text-center">{item.size || '-'}</td>
                             <td className="p-3 text-center">{item.quantity}</td>
                             <td className="p-3 text-right">₦{(item.subtotal || 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                           </tr>
@@ -135,15 +137,15 @@ const Orders = () => {
                       </tbody>
                       <tfoot className="bg-gray-50 font-medium">
                         <tr>
-                          <td colSpan="3" className="p-3 text-right">Subtotal:</td>
+                          <td colSpan="4" className="p-3 text-right">Subtotal:</td>
                           <td className="p-3 text-right">₦{(order?.subtotal || 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         </tr>
                         <tr>
-                          <td colSpan="3" className="p-3 text-right">Shipping:</td>
+                          <td colSpan="4" className="p-3 text-right">Shipping:</td>
                           <td className="p-3 text-right">₦{(order?.shipping_cost || 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         </tr>
                         <tr className="font-bold">
-                          <td colSpan="3" className="p-3 text-right">Total:</td>
+                          <td colSpan="4" className="p-3 text-right">Total:</td>
                           <td className="p-3 text-right">₦{(order?.total_amount || 0).toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         </tr>
                       </tfoot>

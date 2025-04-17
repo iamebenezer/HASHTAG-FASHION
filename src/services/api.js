@@ -10,26 +10,30 @@ const api = createHttpClient(API_URL);
 const transformProductResponse = (response) => {
   if (response.data) {
     if (Array.isArray(response.data)) {
-      response.data = response.data.map(product => ({
-        ...product,
-        image_url: product.image ? `${API_URL}/storage/${product.image}` : null,
-        colorVariants: product.colorVariants ? product.colorVariants.map(variant => ({
-          ...variant,
-          image_url: variant.image ? `${API_URL}/storage/${variant.image}` : null,
-          price: parseFloat(variant.price || product.price),
-          stock: parseInt(variant.stock || product.stock)
-        })) : []
-      }));
+      response.data = response.data.map(product => {
+        // Always normalize colorVariants from color_variants if present, fallback to colorVariants
+        let colorVariants = [];
+        if (Array.isArray(product.color_variants) && product.color_variants.length > 0) {
+          colorVariants = product.color_variants;
+        } else if (Array.isArray(product.colorVariants) && product.colorVariants.length > 0) {
+          colorVariants = product.colorVariants;
+        }
+        return {
+          ...product,
+          image_url: product.image ? `${API_URL}/storage/${product.image}` : null,
+          colorVariants,
+        };
+      });
     } else {
-      response.data.image_url = response.data.image ? `${API_URL}/storage/${response.data.image}` : null;
-      if (response.data.colorVariants) {
-        response.data.colorVariants = response.data.colorVariants.map(variant => ({
-          ...variant,
-          image_url: variant.image ? `${API_URL}/storage/${variant.image}` : null,
-          price: parseFloat(variant.price || response.data.price),
-          stock: parseInt(variant.stock || response.data.stock)
-        }));
+      const product = response.data;
+      let colorVariants = [];
+      if (Array.isArray(product.color_variants) && product.color_variants.length > 0) {
+        colorVariants = product.color_variants;
+      } else if (Array.isArray(product.colorVariants) && product.colorVariants.length > 0) {
+        colorVariants = product.colorVariants;
       }
+      product.image_url = product.image ? `${API_URL}/storage/${product.image}` : null;
+      product.colorVariants = colorVariants;
     }
   }
   return response;
