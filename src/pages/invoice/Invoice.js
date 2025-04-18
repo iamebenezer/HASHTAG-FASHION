@@ -4,12 +4,13 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 const Invoice = () => {
   const { orderId } = useParams();
   const { state } = useLocation();
-  const [order, setOrder] = useState(state?.order || null);
+  // Fix: Use orderData from navigation state, fallback to order for robustness
+  const [order, setOrder] = useState(state?.orderData || state?.order || null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!order && !state?.order) {
+    if (!order && !state?.orderData && !state?.order) {
       setError('No order details found.');
     }
   }, [order, state]);
@@ -22,7 +23,7 @@ const Invoice = () => {
   if (!order) return <div className="p-8 text-center">Loading invoice...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-8 print:p-0 print:shadow-none">
+    <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-8 print:p-0 print:shadow-none print-invoice">
       <h1 className="text-3xl font-bold mb-2 text-green-700">Payment Successful</h1>
       <p className="mb-4 text-gray-700">Thank you for your purchase! Here is your invoice.</p>
       <div className="mb-6">
@@ -55,8 +56,8 @@ const Invoice = () => {
             </tr>
           </thead>
           <tbody>
-            {order.items && order.items.map(item => (
-              <tr key={item.id}>
+            {order.items && order.items.map((item, idx) => (
+              <tr key={item.product_id || item.id || idx}>
                 <td className="p-2 border">{item.product?.name || item.product_id}</td>
                 <td className="p-2 border">{item.quantity}</td>
                 <td className="p-2 border">₦{parseFloat(item.price).toLocaleString('en-NG')}</td>
@@ -66,7 +67,9 @@ const Invoice = () => {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-between font-bold text-lg mt-4">
+      {/* Add extra space below the table for print clarity */}
+      <div style={{ height: '32px' }} className="print:block hidden"></div>
+      <div className="flex justify-between font-bold text-lg mt-8">
         <span>Total:</span>
         <span>₦{parseFloat(order.total_amount).toLocaleString('en-NG')}</span>
       </div>

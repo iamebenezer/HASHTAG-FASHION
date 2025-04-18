@@ -53,3 +53,16 @@ nav .active li {
 .slick-dots {
   display: none !important;
 }
+
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  .print-invoice {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    background: white !important;
+  }
+}

@@ -101,7 +101,7 @@ const PaymentForm = () => {
 
       const order = await apiService.orders.create(orderData);
       clearCart();
-      navigate(`/invoice/${order.id}`, { state: { order } });
+      navigate(`/invoice/${order.id}`, { state: { orderData } });
     } catch (err) {
       setError('Failed to process order. Please contact support.');
     } finally {
