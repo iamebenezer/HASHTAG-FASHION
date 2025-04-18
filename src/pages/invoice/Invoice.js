@@ -1,35 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { apiService } from '../../services/api';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 const Invoice = () => {
   const { orderId } = useParams();
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { state } = useLocation();
+  const [order, setOrder] = useState(state?.order || null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const data = await apiService.orders.getById(orderId);
-        setOrder(data);
-      } catch (err) {
-        setError('Failed to fetch order details.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrder();
-  }, [orderId]);
+    if (!order && !state?.order) {
+      setError('No order details found.');
+    }
+  }, [order, state]);
 
   const handlePrint = () => {
     window.print();
   };
 
-  if (loading) return <div className="p-8 text-center">Loading invoice...</div>;
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
-  if (!order) return null;
+  if (!order) return <div className="p-8 text-center">Loading invoice...</div>;
 
   return (
     <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-8 print:p-0 print:shadow-none">
@@ -39,7 +29,7 @@ const Invoice = () => {
         <h2 className="text-xl font-semibold mb-2">Order Details</h2>
         <div className="text-gray-800">
           <div><b>Order ID:</b> {order.id}</div>
-          <div><b>Date:</b> {new Date(order.created_at).toLocaleString()}</div>
+          <div><b>Date:</b> {order.created_at ? new Date(order.created_at).toLocaleString() : ''}</div>
           <div><b>Status:</b> {order.status}</div>
           <div><b>Payment Method:</b> {order.payment_method}</div>
         </div>
@@ -65,7 +55,7 @@ const Invoice = () => {
             </tr>
           </thead>
           <tbody>
-            {order.items.map(item => (
+            {order.items && order.items.map(item => (
               <tr key={item.id}>
                 <td className="p-2 border">{item.product?.name || item.product_id}</td>
                 <td className="p-2 border">{item.quantity}</td>
