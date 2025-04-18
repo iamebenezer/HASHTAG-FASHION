@@ -26,6 +26,7 @@ import Callback from "./pages/payment/Callback";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Shop from "./pages/Shop/Shop";
+import Invoice from "./pages/invoice/Invoice";
 import { CartProvider } from "./context/CartContext";
 
 const Layout = () => {
@@ -59,6 +60,7 @@ const router = createBrowserRouter(
         <Route path="/payment/callback" element={<Callback />}></Route>
         <Route path="/payment/success" element={<PaymentSuccess />}></Route>
         <Route path="/orders" element={<Orders />}></Route>
+        <Route path="/invoice/:orderId" element={<Invoice />} />
       </Route>
       <Route path="/signup" element={<SignUp />}></Route>
       <Route path="/signin" element={<SignIn />}></Route>
