@@ -26,6 +26,7 @@ const Invoice = () => {
     <div className="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8 mt-8 print:p-0 print:shadow-none print-invoice">
       <h1 className="text-3xl font-bold mb-2 text-green-700">Payment Successful</h1>
       <p className="mb-4 text-gray-700">Thank you for your purchase! Here is your invoice.</p>
+      <p className="mb-4 text-blue-700 font-semibold">Your order will be shipped in 3 to 5 days.</p>
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-2">Order Details</h2>
         <div className="text-gray-800">
@@ -69,6 +70,10 @@ const Invoice = () => {
       </div>
       {/* Add extra space below the table for print clarity */}
       <div style={{ height: '32px' }} className="print:block hidden"></div>
+      <div className="flex justify-between mt-4">
+        <span>Shipping Fee:</span>
+        <span>₦{parseFloat(order.shipping_cost || 0).toLocaleString('en-NG')}</span>
+      </div>
       <div className="flex justify-between font-bold text-lg mt-8">
         <span>Total:</span>
         <span>₦{parseFloat(order.total_amount).toLocaleString('en-NG')}</span>
@@ -86,6 +91,9 @@ const Invoice = () => {
         >
           Back to Home
         </button>
+      </div>
+      <div className="mt-8 text-center text-sm text-gray-500">
+        For support, <a href="/contact" className="text-blue-600 underline">contact us</a>.
       </div>
     </div>
   );
