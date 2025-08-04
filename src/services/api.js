@@ -52,6 +52,7 @@ export const apiService = {
   // Product endpoints
   products: {
     getAll: () => api.get('/products').then(transformProductResponse).then(extractData),
+    getPreorderProducts: () => api.get('/products/preorder').then(transformProductResponse).then(extractData),
     getById: (id) => api.get(`/products/${id}`).then(transformProductResponse).then(extractData),
     getByCategory: (categoryId) => api.get(`/categories/${categoryId}/products`).then(transformProductResponse).then(extractData),
     search: (query, categoryId) => {
@@ -83,6 +84,12 @@ export const apiService = {
     create: (orderData) => api.post('/orders', orderData).then(extractData),
     getById: (id) => api.get(`/orders/${id}`).then(extractData),
     updateStatus: (orderId, data) => api.put(`/orders/${orderId}/status`, data).then(extractData),
+  },
+
+  // Preorder endpoints
+  preorders: {
+    create: (preorderData) => api.post('/preorders', preorderData).then(extractData),
+    getById: (id) => api.get(`/preorders/${id}`).then(extractData),
   }
 };
 

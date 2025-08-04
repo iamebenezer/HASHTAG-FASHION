@@ -27,6 +27,7 @@ import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import ProductDetails from "./pages/ProductDetails/ProductDetails";
 import Shop from "./pages/Shop/Shop";
 import Invoice from "./pages/invoice/Invoice";
+import ComingSoon from "./pages/ComingSoon/ComingSoon";
 import { CartProvider } from "./context/CartContext";
 
 const Layout = () => {
@@ -49,6 +50,7 @@ const router = createBrowserRouter(
         {/* ==================== Header Navlink Start here =================== */}
         <Route  index element={<Home />}></Route>
         <Route   path="/shop" element={<Shop />}></Route>
+        <Route path="/coming-soon" element={<ComingSoon />}></Route>
         <Route path="/about" element={<About />}></Route>
         <Route path="/contact" element={<Contact />}></Route>
         {/* <Route path="/journal" element={<Journal />}></Route> */}

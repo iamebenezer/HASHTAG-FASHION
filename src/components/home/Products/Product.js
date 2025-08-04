@@ -10,6 +10,7 @@ import { useCart } from "../../../context/CartContext";
 import apiService from "../../../services/api";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import PreorderButton from "../../PreorderButton";
 
 const Product = memo((props) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -134,8 +135,21 @@ const Product = memo((props) => {
           <p className="text-[#767676] text-[14px]">{props.price}</p>
         </div>
         <div>
-          {/* Hardcode color variant label for now */}
-          <p className="text-xs text-gray-600 mt-1">Multiple color variants</p>
+          {/* Show preorder badge if it's a preorder product */}
+          {props.is_preorder ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                Pre-order
+              </span>
+              {props.preorder_release_date && (
+                <span className="text-xs text-gray-600">
+                  Available: {new Date(props.preorder_release_date).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-600 mt-1">Multiple color variants</p>
+          )}
         </div>
       </div>
     </div>
