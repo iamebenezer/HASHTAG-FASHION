@@ -27,13 +27,19 @@ const Product = () => {
     const fetchProduct = async () => {
       try {
         // Get the product ID from the URL parameter
-        const id = params.id;
+        const id = params._id;
         // Fetch product details using the ID
         const product = await apiService.products.getById(id);
         
         if (product) {
           console.log("Fetched product:", product);
-          
+          console.log("Is preorder?", product.is_preorder);
+          console.log("Preorder fields:", {
+            is_preorder: product.is_preorder,
+            preorder_release_date: product.preorder_release_date,
+            preorder_description: product.preorder_description
+          });
+
           // Set the product data
           setProduct(product);
           
@@ -53,7 +59,7 @@ const Product = () => {
     };
 
     fetchProduct();
-  }, [params.id]);
+  }, [params._id]);
 
   const handleAddToCart = async () => {
     // If product has color variants but none selected, show error
@@ -215,7 +221,7 @@ const Product = () => {
 
           <div className="flex gap-4 flex-wrap">
             {/* Regular Add to Cart Button - only show if not a preorder product */}
-            {!product.is_preorder && (
+            {!(product.is_preorder === true || product.is_preorder === 1 || product.is_preorder === "1") && (
               <button
                 onClick={handleAddToCart}
                 disabled={isAddingToCart}

@@ -25,6 +25,19 @@ const Product = memo((props) => {
     : (props.color_variants && Array.isArray(props.color_variants) ? props.color_variants : []);
   const hasColorVariants = colorVariants.length > 0;
 
+  // Format price with commas
+  const formatPrice = (price) => {
+    if (typeof price === 'string') {
+      // If price already has ₦ symbol, return as is
+      if (price.includes('₦')) return price;
+      // Remove any existing commas first
+      price = price.replace(/,/g, '');
+    }
+    const numericPrice = parseFloat(price);
+    if (isNaN(numericPrice)) return price;
+    return `₦${numericPrice.toLocaleString('en-NG')}`;
+  };
+
   // Use the actual product ID for navigation instead of the product name
   const handleProductDetails = () => {
     const productId = props.id || props._id;
@@ -132,7 +145,7 @@ const Product = memo((props) => {
           <h2 className="text-lg text-primeColor font-bold">
             {props.productName}
           </h2>
-          <p className="text-[#767676] text-[14px]">{props.price}</p>
+          <p className="text-[#767676] text-[14px]">{formatPrice(props.price)}</p>
         </div>
         <div>
           {/* Show preorder badge if it's a preorder product */}

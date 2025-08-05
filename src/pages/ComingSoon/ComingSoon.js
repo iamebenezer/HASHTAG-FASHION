@@ -23,19 +23,29 @@ const ComingSoon = () => {
         const preorderItems = response;
         
         // Transform products to match the expected format
-        const transformedProducts = preorderItems.map(product => ({
-          ...product,
-          _id: product.id,
-          img: product.image_url || product.image || '/default-product-image.jpg',
-          productName: product.name,
-          price: typeof product.price === 'string' ? product.price : product.price?.toLocaleString(),
-          des: product.description,
-          color: product.color || 'N/A',
-          badge: false,
-          is_preorder: true,
-          preorder_release_date: product.preorder_release_date,
-          preorder_description: product.preorder_description
-        }));
+        const transformedProducts = preorderItems.map(product => {
+          // Format price with commas
+          let formattedPrice = product.price;
+          if (typeof formattedPrice === 'string') {
+            formattedPrice = formattedPrice.replace(/,/g, '');
+          }
+          const numericPrice = parseFloat(formattedPrice);
+          const priceWithCommas = isNaN(numericPrice) ? formattedPrice : `₦${numericPrice.toLocaleString('en-NG')}`;
+
+          return {
+            ...product,
+            _id: product.id,
+            img: product.image_url || product.image || '/default-product-image.jpg',
+            productName: product.name,
+            price: priceWithCommas,
+            des: product.description,
+            color: product.color || 'N/A',
+            badge: false,
+            is_preorder: true,
+            preorder_release_date: product.preorder_release_date,
+            preorder_description: product.preorder_description
+          };
+        });
         
         setPreorderProducts(transformedProducts);
       } catch (err) {

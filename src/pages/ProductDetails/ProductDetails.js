@@ -9,6 +9,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingSpinner from "../../components/LoadingSpinner";
+import PreorderButton from "../../components/PreorderButton";
 
 const ProductDetails = () => {
   const location = useLocation();
@@ -290,17 +291,30 @@ const ProductDetails = () => {
           </div>
 
           <div className="flex gap-4">
-            <button 
-              onClick={handleAddToCart}
-              disabled={isAddingToCart}
-              className={`flex items-center justify-center gap-2 bg-primeColor text-white px-6 py-3 rounded hover:bg-black transition ${
-                isAddingToCart ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
-            >
-              <FaShoppingCart />
-              {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
-            </button>
-            <button 
+            {/* Regular Add to Cart Button - only show if not a preorder product */}
+            {!product.is_preorder && (
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className={`flex items-center justify-center gap-2 bg-primeColor text-white px-6 py-3 rounded hover:bg-black transition ${
+                  isAddingToCart ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
+              >
+                <FaShoppingCart />
+                {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
+              </button>
+            )}
+
+            {/* Preorder Button - only show if it's a preorder product */}
+            <PreorderButton
+              product={product}
+              selectedColor={selectedColor}
+              selectedSize={selectedSize}
+              quantity={quantity}
+              className="px-6 py-3"
+            />
+
+            <button
               onClick={() => navigate(-1)}
               className="bg-gray-200 text-gray-800 px-6 py-3 rounded hover:bg-gray-300 transition"
             >

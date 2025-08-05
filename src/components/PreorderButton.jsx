@@ -75,7 +75,8 @@ const PreorderButton = ({ product, selectedColor, selectedSize, quantity = 1, cl
   };
 
   // Don't show preorder button if product is not available for preorder
-  if (!product.is_preorder) {
+  const isPreorderProduct = product.is_preorder === true || product.is_preorder === 1 || product.is_preorder === "1";
+  if (!isPreorderProduct) {
     return null;
   }
 
