@@ -8,7 +8,7 @@ import { useCart } from "../../context/CartContext";
 import { FaShoppingCart } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import PreorderButton from "../../components/PreorderButton";
+import PreorderPaymentButton from "../../components/PreorderPaymentButton";
 
 const Product = () => {
   const location = useLocation();
@@ -234,8 +234,8 @@ const Product = () => {
               </button>
             )}
 
-            {/* Preorder Button - only show if it's a preorder product */}
-            <PreorderButton
+            {/* Preorder Payment Button - only show if it's a preorder product */}
+            <PreorderPaymentButton
               product={product}
               selectedColor={selectedColor}
               selectedSize={null} // Add size selection logic if needed

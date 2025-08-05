@@ -9,7 +9,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import LoadingSpinner from "../../components/LoadingSpinner";
-import PreorderButton from "../../components/PreorderButton";
+import PreorderPaymentButton from "../../components/PreorderPaymentButton";
 
 const ProductDetails = () => {
   const location = useLocation();
@@ -305,8 +305,8 @@ const ProductDetails = () => {
               </button>
             )}
 
-            {/* Preorder Button - only show if it's a preorder product */}
-            <PreorderButton
+            {/* Preorder Payment Button - only show if it's a preorder product */}
+            <PreorderPaymentButton
               product={product}
               selectedColor={selectedColor}
               selectedSize={selectedSize}

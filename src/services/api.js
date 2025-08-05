@@ -90,6 +90,7 @@ export const apiService = {
   preorders: {
     create: (preorderData) => api.post('/preorders', preorderData).then(extractData),
     getById: (id) => api.get(`/preorders/${id}`).then(extractData),
+    linkOrder: (preorderId, orderData) => api.put(`/preorders/${preorderId}/link-order`, orderData).then(extractData),
   }
 };
 
