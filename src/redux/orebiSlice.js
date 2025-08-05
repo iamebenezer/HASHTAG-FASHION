@@ -5,6 +5,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   products: [],
   orders: [], // Adding orders array to the initial state
+  preorders: [], // Adding preorders array to the initial state
 };
 
 const orebiSlice = createSlice({
@@ -53,6 +54,27 @@ const orebiSlice = createSlice({
     ADD_ORDER: (state, action) => {
       state.orders.push(action.payload);
     },
+
+    ADD_PREORDER: (state, action) => {
+      state.preorders.push(action.payload);
+    },
+
+    SET_ORDERS: (state, action) => {
+      state.orders = action.payload;
+    },
+
+    SET_PREORDERS: (state, action) => {
+      state.preorders = action.payload;
+    },
+
+    CLEAN_INVALID_ORDERS: (state) => {
+      // Remove orders with no customer data or total amount
+      state.orders = state.orders.filter(order =>
+        order &&
+        order.total_amount > 0 &&
+        (order.customerName || order.customerEmail)
+      );
+    },
   },
 });
 
@@ -63,6 +85,10 @@ export const {
   drecreaseQuantity,
   resetCart,
   ADD_ORDER,
+  ADD_PREORDER,
+  SET_ORDERS,
+  SET_PREORDERS,
+  CLEAN_INVALID_ORDERS,
 } = orebiSlice.actions;
 
 export default orebiSlice.reducer;

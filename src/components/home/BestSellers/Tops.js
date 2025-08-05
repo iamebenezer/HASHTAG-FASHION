@@ -55,9 +55,10 @@ const Tops = () => {
           throw new Error('Invalid products data format');
         }
 
-        // Remove duplicates and invalid products
-        const validProducts = topsProducts.filter(product => 
-          product && product.id && product.name && product.price
+        // Remove duplicates, invalid products, and preorder products
+        const validProducts = topsProducts.filter(product =>
+          product && product.id && product.name && product.price &&
+          !product.is_preorder && product.is_preorder !== 1 && product.is_preorder !== "1"
         );
         // Normalize colorVariants for each product like ProductDetails.js
         const normalizedProducts = validProducts.map(product => ({

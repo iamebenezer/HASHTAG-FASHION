@@ -44,6 +44,11 @@ const Shop = () => {
         if (!productsData || !Array.isArray(productsData)) {
           throw new Error('Invalid products data format');
         }
+        // Filter out preorder products from the shop page
+        productsData = productsData.filter(product => {
+          return !product.is_preorder && product.is_preorder !== 1 && product.is_preorder !== "1";
+        });
+
         // Normalize colorVariants for each product exactly like ProductDetails.js
         productsData = productsData.map(product => ({
           ...product,

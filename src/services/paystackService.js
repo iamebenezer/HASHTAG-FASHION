@@ -6,8 +6,8 @@ import { apiService } from './api';
  * This service handles all Paystack-related API calls
  */
 
-// Replace with your actual Paystack public key
-const PAYSTACK_PUBLIC_KEY = "pk_test_ccf2f056f486538b0bc75cbb73950164d05ba781";
+// Paystack public key - using the same live key as regular checkout
+const PAYSTACK_PUBLIC_KEY = "pk_live_bcaa7ed12333000a393421a5fad299172b29c4bb";
 
 /**
  * Initialize Paystack payment
@@ -42,6 +42,12 @@ export const initializePayment = (paymentData) => {
         ref: paymentData.reference,
         onSuccess: (response) => {
           console.log("Paystack callback response:", response);
+
+          // Call the custom callback if provided
+          if (paymentData.callback && typeof paymentData.callback === 'function') {
+            paymentData.callback(response);
+          }
+
           // Let the webhook handle order status update
           resolve(response);
         },

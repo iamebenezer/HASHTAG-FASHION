@@ -83,7 +83,7 @@ export const apiService = {
   orders: {
     create: (orderData) => api.post('/orders', orderData).then(extractData),
     getById: (id) => api.get(`/orders/${id}`).then(extractData),
-    updateStatus: (orderId, data) => api.put(`/orders/${orderId}/status`, data).then(extractData),
+    updateStatus: (reference, data) => api.put(`/orders/${reference}/status-by-reference`, data).then(extractData),
   },
 
   // Preorder endpoints
